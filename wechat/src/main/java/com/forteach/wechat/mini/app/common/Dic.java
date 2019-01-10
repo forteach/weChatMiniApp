@@ -47,4 +47,9 @@ public class Dic {
     public static final String COURSE_ZILIAO_VIEW="3";
     public static final String COURSE_ZILIAO_AUDIO="4";
     public static final String COURSE_ZILIAO_LINK="5";
+    // 设置保存redis时间常量信息
+    public final static Long TWO_HOURS = 3600L * 2;
+    public final static Long ONE_DAYS = 3600L * 24;
+    public final static Long SEVEN_DAYS = 3600L * 24 * 7;
+    public final static String WX_USER_PREFIX = "wx_user_";
 }
