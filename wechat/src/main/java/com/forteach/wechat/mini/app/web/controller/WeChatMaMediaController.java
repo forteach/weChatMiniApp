@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import me.chanjar.weixin.common.bean.result.WxMediaUploadResult;
 import me.chanjar.weixin.common.error.WxErrorException;
@@ -26,7 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * @Auther: zhangyy
+ * @author zhangyy
  * @Email: zhang10092009@hotmail.com
  * @Date: 19-1-10 15:33
  * @Version: 1.0
@@ -34,17 +33,14 @@ import java.util.List;
  */
 @Api(value = "用户操作文件相关接口", description = "微信调用操作文件相关接口", tags = {"操作文件"})
 @RestController
-@RequestMapping("/media/{appid}")
+@RequestMapping("/media")
 public class WeChatMaMediaController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @ApiOperation(value = "微信上传文件")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "appId", name = "appid", required = true, dataType = "String", paramType = "from")
-    })
     @PostMapping("/upload")
-    public WebResult uploadMedia(@PathVariable String appid, HttpServletRequest request) throws WxErrorException {
-        final WxMaService wxService = WeChatMiniAppConfig.getMaService(appid);
+    public WebResult uploadMedia(HttpServletRequest request) throws WxErrorException {
+        final WxMaService wxService = WeChatMiniAppConfig.getMaService();
 
         CommonsMultipartResolver resolver = new CommonsMultipartResolver(request.getSession().getServletContext());
 
@@ -75,13 +71,10 @@ public class WeChatMaMediaController {
      * 下载临时素材
      */
     @ApiOperation(value = "下载微信文件")
-    @ApiImplicitParams({
-            @ApiImplicitParam(value = "微信appId", name = "appid", required = true, dataType = "string", paramType = "query"),
-            @ApiImplicitParam(value = "文件对应的mediaId", name = "mediaId", required = true, dataType = "string", paramType = "query")
-    })
+    @ApiImplicitParam(value = "文件对应的mediaId", name = "mediaId", required = true, dataType = "string", paramType = "query")
     @GetMapping("/download/{mediaId}")
-    public File getMedia(@PathVariable String appid, @PathVariable String mediaId) throws WxErrorException {
-        final WxMaService wxService = WeChatMiniAppConfig.getMaService(appid);
+    public File getMedia(@PathVariable String mediaId) throws WxErrorException {
+        final WxMaService wxService = WeChatMiniAppConfig.getMaService();
         return wxService.getMediaService().getMedia(mediaId);
     }
 }

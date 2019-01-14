@@ -51,5 +51,5 @@ public class Dic {
     public final static Long TWO_HOURS = 3600L * 2;
     public final static Long ONE_DAYS = 3600L * 24;
     public final static Long SEVEN_DAYS = 3600L * 24 * 7;
-    public final static String WX_USER_PREFIX = "wx_user_";
+    public final static String WX_USER_PREFIX = "wxUser$";
 }

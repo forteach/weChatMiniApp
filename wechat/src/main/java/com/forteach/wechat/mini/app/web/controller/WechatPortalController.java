@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Objects;
 
 /**
@@ -35,7 +34,7 @@ public class WechatPortalController {
         if (StringUtils.isAnyBlank(signature, timestamp, nonce, echostr)) {
             throw new IllegalArgumentException("请求参数非法，请核实!");
         }
-        final WxMaService wxService = WeChatMiniAppConfig.getMaService(appid);
+        final WxMaService wxService = WeChatMiniAppConfig.getMaService();
 
         if (wxService.checkSignature(timestamp, nonce, signature)) {
             return echostr;
@@ -56,7 +55,7 @@ public class WechatPortalController {
                         " timestamp=[{}], nonce=[{}], requestBody=[\n{}\n] ",
                 msgSignature, encryptType, signature, timestamp, nonce, requestBody);
 
-        final WxMaService wxService = WeChatMiniAppConfig.getMaService(appid);
+        final WxMaService wxService = WeChatMiniAppConfig.getMaService();
 
         final boolean isJson = Objects.equals(wxService.getWxMaConfig().getMsgDataFormat(),
                 WxMaConstants.MsgDataFormat.JSON);

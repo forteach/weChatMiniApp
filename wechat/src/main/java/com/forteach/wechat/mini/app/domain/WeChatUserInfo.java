@@ -1,6 +1,5 @@
 package com.forteach.wechat.mini.app.domain;
 
-import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,7 +25,8 @@ import javax.persistence.*;
 })
 @EqualsAndHashCode(callSuper = true)
 @org.hibernate.annotations.Table(appliesTo = "wx_userinfo", comment = "微信用户信息")
-public class WeChatUserInfo extends Entitys{
+public class WeChatUserInfo extends Entitys {
+
     @Id
     @GenericGenerator(name = "system-uuid", strategy = "uuid")
     @GeneratedValue(generator = "system-uuid")

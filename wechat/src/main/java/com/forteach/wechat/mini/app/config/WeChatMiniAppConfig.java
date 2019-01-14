@@ -10,6 +10,7 @@ import cn.binarywang.wx.miniapp.message.WxMaMessageHandler;
 import cn.binarywang.wx.miniapp.message.WxMaMessageRouter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.result.WxMediaUploadResult;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +29,13 @@ import java.util.stream.Collectors;
  * @Version: 1.0
  * @Description:
  */
+@Slf4j
 @Configuration
 @EnableConfigurationProperties(WechatProperties.class)
 public class WeChatMiniAppConfig {
 
+    private WechatProperties properties;
+    private static String appId;
     private final WxMaMessageHandler templateMsgHandler = (wxMessage, context, service, sessionManager) ->
             service.getMsgService().sendTemplateMsg(WxMaTemplateMessage.builder()
                     .templateId("此处更换为自己的模板id")
@@ -82,8 +86,6 @@ public class WeChatMiniAppConfig {
         }
     };
 
-    private WechatProperties properties;
-
     private static Map<String, WxMaMessageRouter> routers = Maps.newHashMap();
     private static Map<String, WxMaService> maServices = Maps.newHashMap();
 
@@ -96,12 +98,11 @@ public class WeChatMiniAppConfig {
         return routers;
     }
 
-    public static WxMaService getMaService(String appid) {
-        WxMaService wxService = maServices.get(appid);
+    public static WxMaService getMaService() {
+        WxMaService wxService = maServices.get(appId);
         if (wxService == null) {
-            throw new IllegalArgumentException(String.format("未找到对应appid=[%s]的配置，请核实！", appid));
+            throw new IllegalArgumentException(String.format("未找到对应appid=[%s]的配置，请核实！", appId));
         }
-
         return wxService;
     }
 
@@ -109,19 +110,8 @@ public class WeChatMiniAppConfig {
     public Object services() {
         maServices = this.properties.getConfigs()
                 .stream()
-                .map(a -> {
-                    WxMaInMemoryConfig config = new WxMaInMemoryConfig();
-                    config.setAppid(a.getAppid());
-                    config.setSecret(a.getSecret());
-                    config.setToken(a.getToken());
-                    config.setAesKey(a.getAesKey());
-                    config.setMsgDataFormat(a.getMsgDataFormat());
-
-                    WxMaService service = new WxMaServiceImpl();
-                    service.setWxMaConfig(config);
-                    routers.put(a.getAppid(), this.newRouter(service));
-                    return service;
-                }).collect(Collectors.toMap(s -> s.getWxMaConfig().getAppid(), a -> a));
+                .map(this::apply)
+                .collect(Collectors.toMap(s -> s.getWxMaConfig().getAppid(), a -> a));
 
         return Boolean.TRUE;
     }
@@ -135,5 +125,22 @@ public class WeChatMiniAppConfig {
                 .rule().async(false).content("图片").handler(picHandler).end()
                 .rule().async(false).content("二维码").handler(qrcodeHandler).end();
         return router;
+    }
+
+    private WxMaService apply(WechatProperties.Config a) {
+        WxMaInMemoryConfig config = new WxMaInMemoryConfig();
+        config.setAppid(a.getAppid());
+        config.setSecret(a.getSecret());
+        config.setToken(a.getToken());
+        config.setAesKey(a.getAesKey());
+        config.setMsgDataFormat(a.getMsgDataFormat());
+        appId = a.getAppid();
+        if (log.isDebugEnabled()) {
+            log.debug("appId : {}", appId);
+        }
+        WxMaService service = new WxMaServiceImpl();
+        service.setWxMaConfig(config);
+        routers.put(a.getAppid(), this.newRouter(service));
+        return service;
     }
 }

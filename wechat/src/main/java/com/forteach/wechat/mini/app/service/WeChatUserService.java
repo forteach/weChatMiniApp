@@ -10,5 +10,5 @@ import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
  * @Description:
  */
 public interface WeChatUserService {
-    void saveUser(WxMaUserInfo wxMaUserInfo);
+    void saveUser(WxMaUserInfo wxMaUserInfo) throws Exception;
 }

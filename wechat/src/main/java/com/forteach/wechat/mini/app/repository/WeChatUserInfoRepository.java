@@ -3,6 +3,8 @@ package com.forteach.wechat.mini.app.repository;
 import com.forteach.wechat.mini.app.domain.WeChatUserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.stream.Stream;
+
 /**
  * @Auther: zhangyy
  * @Email: zhang10092009@hotmail.com
@@ -11,4 +13,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @Description:
  */
 public interface WeChatUserInfoRepository extends JpaRepository<WeChatUserInfo, String> {
+    Stream<WeChatUserInfo> findByOpenId(String openId);
 }

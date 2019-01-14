@@ -2,7 +2,6 @@ package com.forteach.wechat.mini.app.util;
 
 import com.forteach.wechat.mini.app.common.WebResult;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

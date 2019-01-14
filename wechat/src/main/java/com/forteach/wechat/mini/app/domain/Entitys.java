@@ -28,10 +28,10 @@ public abstract class Entitys implements Serializable {
     public String isValidated = "0";
 
     @Column(name = "u_time", columnDefinition = "VARCHAR(32)  COMMENT '更新时间'")
-    public String uTime=DateUtil.now();
+    public String uTime = DateUtil.now();
 
     @Column(updatable = false, name = "c_time", columnDefinition = "VARCHAR(32) COMMENT '创建时间'")
-    public String cTime=StrUtil.isBlank(this.cTime)?DateUtil.now():this.cTime;
+    public String cTime = StrUtil.isBlank(this.cTime) ? DateUtil.now() : this.cTime;
 
     @Column(updatable = false, name = "c_user", columnDefinition = "VARCHAR(32) COMMENT '创建人'")
     public String cUser;

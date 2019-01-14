@@ -11,7 +11,6 @@ import java.util.List;
  * @Version: 1.0
  * @Description:
  */
-@Data
 @ConfigurationProperties(prefix = "wechat.miniapp")
 public class WechatProperties {
 
@@ -43,5 +42,13 @@ public class WechatProperties {
          * 消息格式，XML或者JSON
          */
         private String msgDataFormat;
+    }
+
+    public List<Config> getConfigs() {
+        return configs;
+    }
+
+    public void setConfigs(List<Config> configs) {
+        this.configs = configs;
     }
 }
