@@ -11,10 +11,11 @@ import java.util.Map;
  * @email: zhang10092009@hotmail.com
  * @date: 19-1-14 16:25
  * @version: 1.0
- * @description:
+ * @description: map和属性对象之间的转换
  */
 @Slf4j
 public class MapUtil {
+
     public static Object mapToObject(Map<String, Object> map, Class<?> beanClass) throws Exception {
         if (map == null) {
             return null;

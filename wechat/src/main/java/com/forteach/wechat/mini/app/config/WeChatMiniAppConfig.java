@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import java.io.File;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,7 +34,9 @@ import java.util.stream.Collectors;
 public class WeChatMiniAppConfig {
 
     private WechatProperties properties;
+
     private static String appId;
+
     private final WxMaMessageHandler templateMsgHandler = (wxMessage, context, service, sessionManager) ->
             service.getMsgService().sendTemplateMsg(WxMaTemplateMessage.builder()
                     .templateId("此处更换为自己的模板id")
@@ -134,10 +135,8 @@ public class WeChatMiniAppConfig {
         config.setToken(a.getToken());
         config.setAesKey(a.getAesKey());
         config.setMsgDataFormat(a.getMsgDataFormat());
+        //设置 appId
         appId = a.getAppid();
-        if (log.isDebugEnabled()) {
-            log.debug("appId : {}", appId);
-        }
         WxMaService service = new WxMaServiceImpl();
         service.setWxMaConfig(config);
         routers.put(a.getAppid(), this.newRouter(service));

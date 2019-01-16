@@ -42,7 +42,7 @@ public class Swagger {
                 .description("微信小程序文档接口")
                 //服务条款网址
                 .version("1.0")
-                .contact(new Contact("wechat", "https://github.com/forteach/weChatMiniApp/wechat", ""))
+                .contact(new Contact("wechat", "https://github.com/forteach/weChatMiniApp/wechat", "zhang10092009@hotmail.com"))
                 .build();
     }
 }

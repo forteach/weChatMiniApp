@@ -38,7 +38,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
     private RedisTemplate<String, String> redisTemplate;
 
     /**
-     * 保存用户通过微信登录进来的信息到mysql 和 redis(设置7天有效期)
+     * 保存用户通过微信登录进来的信息到mysql 和 redis(设置２个小时有效期)
      * @param wxMaUserInfo
      */
     @Override
@@ -49,10 +49,10 @@ public class WeChatUserServiceImpl implements WeChatUserService {
         WeChatUserInfo weChatUserInfo = optionalWeChatUserInfo.orElseGet(WeChatUserInfo::new);
         BeanUtils.copyProperties(wxMaUserInfo, weChatUserInfo);
         weChatUserInfoRepository.save(weChatUserInfo);
-        //保存redis 设置有效期一天
+        //保存redis 设置有效期2个小时
         Map<String, Object> map = MapUtil.objectToMap(weChatUserInfo);
         String key = WX_USER_PREFIX + wxMaUserInfo.getOpenId();
         stringRedisTemplate.opsForHash().putAll(key, map);
-        stringRedisTemplate.expire(key, 1, TimeUnit.DAYS);
+        stringRedisTemplate.expire(key, 2, TimeUnit.HOURS);
     }
 }
