@@ -23,7 +23,7 @@ public class WechatPortalController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @GetMapping(produces = "text/plain;charset=utf-8")
-    public String authGet(@PathVariable String appid,
+    public String authGet(@PathVariable("appid") String appid,
                           @RequestParam(name = "signature", required = false) String signature,
                           @RequestParam(name = "timestamp", required = false) String timestamp,
                           @RequestParam(name = "nonce", required = false) String nonce,
@@ -44,7 +44,7 @@ public class WechatPortalController {
     }
 
     @PostMapping(produces = "application/xml; charset=UTF-8")
-    public String post(@PathVariable String appid,
+    public String post(@PathVariable("appid") String appid,
                        @RequestBody String requestBody,
                        @RequestParam("msg_signature") String msgSignature,
                        @RequestParam("encrypt_type") String encryptType,

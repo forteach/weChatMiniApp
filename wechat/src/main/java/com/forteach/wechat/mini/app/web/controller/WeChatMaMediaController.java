@@ -73,7 +73,7 @@ public class WeChatMaMediaController {
     @ApiOperation(value = "下载微信文件")
     @ApiImplicitParam(value = "文件对应的mediaId", name = "mediaId", required = true, dataType = "string", paramType = "query")
     @GetMapping("/download/{mediaId}")
-    public File getMedia(@PathVariable String mediaId) throws WxErrorException {
+    public File getMedia(@PathVariable("mediaId") String mediaId) throws WxErrorException {
         final WxMaService wxService = WeChatMiniAppConfig.getMaService();
         return wxService.getMediaService().getMedia(mediaId);
     }
