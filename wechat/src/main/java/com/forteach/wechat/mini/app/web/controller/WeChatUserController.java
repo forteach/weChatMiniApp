@@ -9,17 +9,15 @@ import com.forteach.wechat.mini.app.common.WebResult;
 import com.forteach.wechat.mini.app.config.WeChatMiniAppConfig;
 import com.forteach.wechat.mini.app.service.WeChatUserService;
 import com.forteach.wechat.mini.app.util.JsonUtils;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import com.forteach.wechat.mini.app.web.req.BindingUserInfoReq;
+import io.swagger.annotations.*;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 
 /**
@@ -106,5 +104,16 @@ public class WeChatUserController {
         // 解密
         WxMaPhoneNumberInfo phoneNoInfo = wxService.getUserService().getPhoneNoInfo(sessionKey, encryptedData, iv);
         return WebResult.okResult(JsonUtils.toJson(phoneNoInfo));
+    }
+
+    @ApiOperation(value = "绑定微信用户登录信息")
+    @PostMapping("/binding")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "openId", value = "微信用户openId", required = true, paramType = "from"),
+            @ApiImplicitParam(name = "userName", value = "身份证姓名", required = true, paramType = "from"),
+            @ApiImplicitParam(name = "idCardNo", value = "身份证号码", required = true, paramType = "from")
+    })
+    public WebResult binding(@Valid @RequestBody BindingUserInfoReq bindingUserInfoReq){
+        return weChatUserService.bindingUserInfo(bindingUserInfoReq);
     }
 }

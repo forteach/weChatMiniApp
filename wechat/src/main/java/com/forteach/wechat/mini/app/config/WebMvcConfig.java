@@ -3,6 +3,7 @@ package com.forteach.wechat.mini.app.config;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
+import com.forteach.wechat.mini.app.filter.SysUserLoginInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -56,5 +57,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowedMethods("*")
                 //跨域允许时间
                 .maxAge(3600);
+    }
+
+    @Bean
+    SysUserLoginInterceptor sysUserLoginInterceptor() {
+        return new SysUserLoginInterceptor();
     }
 }

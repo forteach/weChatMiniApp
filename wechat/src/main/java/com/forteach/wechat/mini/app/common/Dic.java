@@ -7,7 +7,9 @@ package com.forteach.wechat.mini.app.common;
  * @date: 2018/10/30 15:07
  */
 public class Dic {
-    //isValidated 的默认值
+    /**
+     * isValidated 的默认值
+     */
     public static final String TAKE_EFFECT_OPEN = "0";
 
     public static final String TAKE_EFFECT_CLOSE = "1";
@@ -41,15 +43,25 @@ public class Dic {
     //课程分享范围-章节
     public static final String COURSE_SHARE_AREA_CHAPTER="2";
 
-    //1文档　2图册　3视频　4音频　5链接
+    /**
+     * 1文档　2图册　3视频　4音频　5链接
+     */
     public static final String COURSE_ZILIAO_FILE="1";
     public static final String COURSE_ZILIAO_PHOTO="2";
     public static final String COURSE_ZILIAO_VIEW="3";
     public static final String COURSE_ZILIAO_AUDIO="4";
     public static final String COURSE_ZILIAO_LINK="5";
-    // 设置保存redis时间常量信息
+    /**
+     * 设置保存redis时间常量信息
+     */
     public final static Long TWO_HOURS = 3600L * 2;
     public final static Long ONE_DAYS = 3600L * 24;
     public final static Long SEVEN_DAYS = 3600L * 24 * 7;
     public final static String WX_USER_PREFIX = "wxUser$";
+
+    /**
+     * 微信登录用户是否绑定信息标识 0 (绑定)　1(未绑定)
+     */
+    public final static String WX_INFO_BINDIND_0 = "0";
+    public final static String WX_INFO_BINDIND_1 = "1";
 }

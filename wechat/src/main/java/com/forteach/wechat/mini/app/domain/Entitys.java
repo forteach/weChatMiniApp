@@ -27,17 +27,17 @@ public abstract class Entitys implements Serializable {
     @Column(name = "is_validated", columnDefinition = "CHAR(1) DEFAULT 0 COMMENT '生效标识 0生效 1失效'", nullable = false)
     public String isValidated = "0";
 
-    @Column(name = "u_time", columnDefinition = "VARCHAR(32)  COMMENT '更新时间'")
-    public String uTime = DateUtil.now();
+    @Column(name = "update_time", columnDefinition = "VARCHAR(32)  COMMENT '更新时间'")
+    public String updateTime = DateUtil.now();
 
-    @Column(updatable = false, name = "c_time", columnDefinition = "VARCHAR(32) COMMENT '创建时间'")
-    public String cTime = StrUtil.isBlank(this.cTime) ? DateUtil.now() : this.cTime;
+    @Column(updatable = false, name = "create_time", columnDefinition = "VARCHAR(32) COMMENT '创建时间'")
+    public String createTime = StrUtil.isBlank(this.createTime) ? DateUtil.now() : this.createTime;
 
-    @Column(updatable = false, name = "c_user", columnDefinition = "VARCHAR(32) COMMENT '创建人'")
-    public String cUser;
+    @Column(updatable = false, name = "create_user", columnDefinition = "VARCHAR(32) COMMENT '创建人'")
+    public String createUser;
 
-    @Column(name = "u_user", columnDefinition = "VARCHAR(32) COMMENT '修改人'")
-    public String uUser;
+    @Column(name = "update_user", columnDefinition = "VARCHAR(32) COMMENT '修改人'")
+    public String updateUser;
 
     @Override
     public String toString() {

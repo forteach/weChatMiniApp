@@ -13,7 +13,7 @@ import javax.persistence.*;
  * @Email: zhang10092009@hotmail.com
  * @Date: 19-1-10 16:44
  * @Version: 1.0
- * @Description:
+ * @Description: 微信登录用户信息
  */
 @Data
 @Entity
@@ -56,4 +56,10 @@ public class WeChatUserInfo extends Entitys {
 
     @Column(name = "avatar_url", columnDefinition = "VARCHAR(256) COMMENT '用户的头像URL'")
     private String avatarUrl;
+
+    @Column(name = "student_id", columnDefinition = "VARCHAR(32) COMMENT '学生id'")
+    private String studentId;
+
+    @Column(name = "binding", columnDefinition = "CHAR(1) DEFAULT 1 COMMENT '绑定标识 0 绑定 1　未绑定'")
+    private String binding;
 }
