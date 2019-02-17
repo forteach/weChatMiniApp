@@ -5,19 +5,30 @@ import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import cn.hutool.core.util.StrUtil;
+import com.forteach.wechat.mini.app.annotation.UserLoginToken;
 import com.forteach.wechat.mini.app.common.WebResult;
 import com.forteach.wechat.mini.app.config.WeChatMiniAppConfig;
+import com.forteach.wechat.mini.app.service.TokenService;
 import com.forteach.wechat.mini.app.service.WeChatUserService;
 import com.forteach.wechat.mini.app.util.JsonUtils;
 import com.forteach.wechat.mini.app.web.req.BindingUserInfoReq;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static com.forteach.wechat.mini.app.common.Dic.WX_USER_PREFIX;
 
 
 /**
@@ -34,10 +45,14 @@ public class WeChatUserController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final WeChatUserService weChatUserService;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final TokenService tokenService;
 
     @Autowired
-    public WeChatUserController(WeChatUserService weChatUserService) {
+    public WeChatUserController(WeChatUserService weChatUserService, StringRedisTemplate stringRedisTemplate, TokenService tokenService) {
         this.weChatUserService = weChatUserService;
+        this.stringRedisTemplate = stringRedisTemplate;
+        this.tokenService = tokenService;
     }
 
     @ApiOperation(value = "微信小程序登录接口", notes = "微信小程序登录接口")
@@ -56,13 +71,23 @@ public class WeChatUserController {
             this.logger.info(session.getSessionKey());
             this.logger.info(session.getOpenid());
             //TODO 可以增加自己的逻辑，关联业务相关数据
-            return WebResult.okResult(JsonUtils.toJson(session));
+            Map<String, String> map = new HashMap<>(2);
+            map.put("openId", session.getOpenid());
+            map.put("sessionKey", session.getSessionKey());
+            //生成tocken 保存 redis
+            map.put("token", tokenService.createToken(session.getOpenid()));
+            String key = WX_USER_PREFIX.concat(session.getOpenid());
+            stringRedisTemplate.opsForHash().putAll(key, map);
+            //设置有效期一天
+            stringRedisTemplate.expire(key, 1L, TimeUnit.DAYS);
+            return WebResult.okResult(JsonUtils.toJson(map));
         } catch (WxErrorException e) {
             this.logger.error(e.getMessage(), e);
             return WebResult.failException(e.toString());
         }
     }
 
+    @UserLoginToken
     @GetMapping("/info")
     @ApiOperation(value = "获取用户信息", notes = "获取用户下信息")
     @ApiImplicitParams({
@@ -92,6 +117,7 @@ public class WeChatUserController {
             @ApiImplicitParam(name = "encryptedData", value = "加密数据", dataType = "string", required = true, paramType = "query"),
             @ApiImplicitParam(name = "iv", value = "数据接口返回", dataType = "string", required = true, paramType = "query"),
     })
+    @UserLoginToken
     @GetMapping("/phone")
     @ApiOperation(value = "获取用户绑定手机号信息", notes = "获取用户绑定手机号信息")
     public WebResult getBingPhone(String sessionKey, String signature,
@@ -106,6 +132,7 @@ public class WeChatUserController {
         return WebResult.okResult(JsonUtils.toJson(phoneNoInfo));
     }
 
+    @UserLoginToken
     @ApiOperation(value = "绑定微信用户登录信息")
     @PostMapping("/binding")
     @ApiImplicitParams({

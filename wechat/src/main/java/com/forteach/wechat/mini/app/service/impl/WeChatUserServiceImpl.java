@@ -16,7 +16,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import javax.annotation.Resource;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -78,8 +77,12 @@ public class WeChatUserServiceImpl implements WeChatUserService {
                 .filter(Objects::nonNull)
                 .findFirst();
         if (studentEntitys.isPresent()) {
+            WeChatUserInfo weChatUserInfo = weChatUserInfoRepository.findByOpenId(bindingUserInfoReq.getOpenId()).filter(Objects::nonNull).findFirst().get();
+            if (WX_INFO_BINDIND_0.equals(weChatUserInfo.getBinding())){
+                return WebResult.failException("该微信账号已经认证");
+            }
             if (checkStudent(bindingUserInfoReq, studentEntitys.get())) {
-                this.saveStudent(bindingUserInfoReq, studentEntitys.get());
+                this.updateWeChatBindingInfo(weChatUserInfo, studentEntitys.get());
                 return WebResult.okResult("绑定成功");
             }
         }
@@ -88,11 +91,10 @@ public class WeChatUserServiceImpl implements WeChatUserService {
 
     /**
      * 保存用户微信绑定的信息
-     * @param bindingUserInfoReq
+     * @param weChatUserInfo
      * @param studentEntitys
      */
-    private void saveStudent(BindingUserInfoReq bindingUserInfoReq, StudentEntitys studentEntitys) {
-        WeChatUserInfo weChatUserInfo = weChatUserInfoRepository.findByOpenId(bindingUserInfoReq.getOpenId()).filter(Objects::nonNull).findFirst().get();
+    private void updateWeChatBindingInfo(WeChatUserInfo weChatUserInfo, StudentEntitys studentEntitys) {
         weChatUserInfo.setStudentId(studentEntitys.getId());
         weChatUserInfo.setBinding(WX_INFO_BINDIND_0);
         weChatUserInfoRepository.save(weChatUserInfo);

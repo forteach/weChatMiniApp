@@ -13,5 +13,10 @@ import java.util.stream.Stream;
  * @Description:
  */
 public interface WeChatUserInfoRepository extends JpaRepository<WeChatUserInfo, String> {
+    /**
+     * 根据微信账号查询绑定学生信息
+     * @param openId
+     * @return
+     */
     Stream<WeChatUserInfo> findByOpenId(String openId);
 }
