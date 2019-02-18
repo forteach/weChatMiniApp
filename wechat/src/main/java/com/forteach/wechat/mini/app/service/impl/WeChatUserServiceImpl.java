@@ -4,6 +4,7 @@ import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
+import cn.hutool.core.util.StrUtil;
 import com.forteach.wechat.mini.app.common.WebResult;
 import com.forteach.wechat.mini.app.config.WeChatMiniAppConfig;
 import com.forteach.wechat.mini.app.domain.StudentEntitys;
@@ -68,31 +69,37 @@ public class WeChatUserServiceImpl implements WeChatUserService {
                 .filter(Objects::nonNull)
                 .findFirst();
         if (studentEntitys.isPresent()) {
-            Optional<WeChatUserInfo> weChatUserInfoOptional = weChatUserInfoRepository.findByOpenId(tokenService.getOpenId(request)).filter(Objects::nonNull).findFirst();
-            if (WX_INFO_BINDIND_0.equals(weChatUserInfoOptional.get().getBinding())) {
-                return WebResult.failException("该微信账号已经认证");
+            Optional<WeChatUserInfo> weChatUserInfoOptional = weChatUserInfoRepository.findByOpenId(tokenService.getOpenId(request))
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .findFirst();
+            if (weChatUserInfoOptional.isPresent() && WX_INFO_BINDIND_0.equals(weChatUserInfoOptional.get().getBinding())){
+                    return WebResult.failException("该微信账号已经认证");
             }
+            WeChatUserInfo weChatUserInfo = weChatUserInfoOptional.orElseGet(WeChatUserInfo::new);
             if (checkStudent(bindingUserInfoReq, studentEntitys.get())) {
                 final WxMaService wxService = WeChatMiniAppConfig.getMaService();
                 String openId = tokenService.getOpenId(request);
                 String sessionKey = tokenService.getSessionKey(openId);
                 String key = WX_USER_PREFIX + openId;
                 // 用户信息校验
-                if (!wxService.getUserService().checkUserInfo(sessionKey, bindingUserInfoReq.getRawData(), bindingUserInfoReq.getSignature())) {
-                    return WebResult.failException("user check failed");
+                WxMaUserInfo wxMaUserInfo = null;
+                if (checkWxInfo(sessionKey, wxService, bindingUserInfoReq)) {
+                    // 解密用户信息
+                    wxMaUserInfo = wxService.getUserService().getUserInfo(sessionKey, bindingUserInfoReq.getEncryptedData(), bindingUserInfoReq.getIv());
                 }
-                // 解密用户信息
-                WxMaUserInfo wxMaUserInfo = wxService.getUserService().getUserInfo(sessionKey, bindingUserInfoReq.getEncryptedData(), bindingUserInfoReq.getIv());
                 // 需要更新用户数据信息
-                Optional<WeChatUserInfo> optionalWeChatUserInfo = weChatUserInfoRepository.findByOpenId(openId).findFirst();
-                WeChatUserInfo weChatUserInfo = optionalWeChatUserInfo.orElseGet(WeChatUserInfo::new);
-                BeanUtils.copyProperties(wxMaUserInfo, weChatUserInfo);
+                if (wxMaUserInfo != null){
+                    BeanUtils.copyProperties(wxMaUserInfo, weChatUserInfo);
+                }
+                weChatUserInfo.setBinding(WX_INFO_BINDIND_0);
+                weChatUserInfo.setStudentId(studentEntitys.get().getId());
+                weChatUserInfo.setOpenId(openId);
                 weChatUserInfoRepository.save(weChatUserInfo);
                 //保存redis 设置有效期7天
                 Map<String, Object> map = MapUtil.objectToMap(weChatUserInfo);
                 stringRedisTemplate.opsForHash().putAll(key, map);
                 stringRedisTemplate.expire(key, 7, TimeUnit.DAYS);
-                this.updateWeChatBindingInfo(weChatUserInfo, studentEntitys.get());
                 return WebResult.okResult("绑定成功");
             }
         }
@@ -109,7 +116,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
         map.put("sessionKey", openId);
         map.put("token", token);
         String binding = WX_INFO_BINDIND_1;
-        Optional<WeChatUserInfo> weChatUserInfoOptional = weChatUserInfoRepository.findByOpenId(openId).findFirst();
+        Optional<WeChatUserInfo> weChatUserInfoOptional = weChatUserInfoRepository.findByOpenId(openId).stream().findFirst();
         if (weChatUserInfoOptional.isPresent()){
             binding = weChatUserInfoOptional.get().getBinding();
         }
@@ -156,5 +163,23 @@ public class WeChatUserServiceImpl implements WeChatUserService {
     private boolean checkStudent(BindingUserInfoReq bindingUserInfoReq, StudentEntitys studentEntitys){
         return studentEntitys.getUserName().equals(bindingUserInfoReq.getUserName())
                 && studentEntitys.getIdCardNo().equals(bindingUserInfoReq.getIdCardNo());
+    }
+
+    /**
+     * 校验是否是微信发送的数据
+     * @param sessionKey
+     * @param wxService
+     * @param bindingUserInfoReq
+     * @return
+     */
+    private boolean checkWxInfo(String sessionKey,WxMaService wxService, BindingUserInfoReq bindingUserInfoReq){
+        if (StrUtil.isNotBlank(bindingUserInfoReq.getEncryptedData())
+                && StrUtil.isNotBlank(bindingUserInfoReq.getSignature())
+                && StrUtil.isNotBlank(bindingUserInfoReq.getIv())
+                && StrUtil.isNotBlank(bindingUserInfoReq.getRawData())){
+            return wxService.getUserService().checkUserInfo(sessionKey,
+                    bindingUserInfoReq.getRawData(), bindingUserInfoReq.getSignature());
+        }
+        return false;
     }
 }

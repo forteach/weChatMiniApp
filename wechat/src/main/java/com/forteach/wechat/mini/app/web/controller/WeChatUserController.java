@@ -85,10 +85,10 @@ public class WeChatUserController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "userName", value = "身份证姓名", required = true, paramType = "from"),
             @ApiImplicitParam(name = "idCardNo", value = "身份证号码", required = true, paramType = "from"),
-            @ApiImplicitParam(name = "signature", value = "sha1( rawData + session_key )", dataType = "string", required = true, paramType = "query"),
-            @ApiImplicitParam(name = "rawData", value = "rawData", dataType = "string", required = true, paramType = "query"),
-            @ApiImplicitParam(name = "encryptedData", value = "加密数据", dataType = "string", required = true, paramType = "query"),
-            @ApiImplicitParam(name = "iv", value = "数据接口返回", dataType = "string", required = true, paramType = "query"),
+            @ApiImplicitParam(name = "signature", value = "sha1( rawData + session_key )", dataType = "string", paramType = "from"),
+            @ApiImplicitParam(name = "rawData", value = "rawData", dataType = "string", paramType = "from"),
+            @ApiImplicitParam(name = "encryptedData", value = "加密数据", dataType = "string", paramType = "from"),
+            @ApiImplicitParam(name = "iv", value = "数据接口返回", dataType = "string", paramType = "from"),
     })
     public WebResult binding(@Valid @RequestBody BindingUserInfoReq bindingUserInfoReq, HttpServletRequest request){
         return weChatUserService.bindingUserInfo(bindingUserInfoReq, request);

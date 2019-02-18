@@ -4,6 +4,9 @@ import com.forteach.wechat.mini.app.web.vo.WxDataVo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import javax.validation.constraints.NotBlank;
 
 /**
  * @Auther: zhangyy
@@ -13,12 +16,15 @@ import lombok.Data;
  * @Description:
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(value = "绑定学生用户登录微信信息")
 public class BindingUserInfoReq extends WxDataVo {
 
+    @NotBlank(message = "用户名不为空")
     @ApiModelProperty(value = "用户名", name = "userName")
     private String userName;
 
+    @NotBlank(message = "身份证号码不为空")
     @ApiModelProperty(value = "身份证号码", name = "idCardNo")
     private String idCardNo;
 }
