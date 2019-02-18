@@ -59,6 +59,7 @@ public class Dic {
     public final static Long SEVEN_DAYS = 3600L * 24 * 7;
     public final static String WX_USER_PREFIX = "wxUserToken$";
 
+    public final static Long TokenValidityTime = 3600L * 24 * 7;
     /**
      * 微信登录用户是否绑定信息标识 0 (绑定)　1(未绑定)
      */

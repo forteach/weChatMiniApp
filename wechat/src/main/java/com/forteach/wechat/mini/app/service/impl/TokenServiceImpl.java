@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
+import static com.forteach.wechat.mini.app.common.Dic.TokenValidityTime;
 import static com.forteach.wechat.mini.app.common.Dic.WX_USER_PREFIX;
 
 /**
@@ -33,7 +35,9 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public String createToken(String openId) {
-        return JWT.create().withAudience(openId)
+        return JWT.create()
+                .withAudience(openId)
+                .withExpiresAt(new Date(System.currentTimeMillis() + TokenValidityTime * 1000))
                 .sign(Algorithm.HMAC256(salt.concat(openId)));
     }
 

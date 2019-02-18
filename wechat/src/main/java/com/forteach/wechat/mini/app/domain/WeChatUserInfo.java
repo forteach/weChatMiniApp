@@ -18,6 +18,8 @@ import javax.persistence.*;
  */
 @Data
 @Entity
+@DynamicInsert
+@DynamicUpdate
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "wx_userinfo", indexes = {

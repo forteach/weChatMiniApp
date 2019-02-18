@@ -99,7 +99,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
                 //保存redis 设置有效期7天
                 Map<String, Object> map = MapUtil.objectToMap(weChatUserInfo);
                 stringRedisTemplate.opsForHash().putAll(key, map);
-                stringRedisTemplate.expire(key, 7, TimeUnit.DAYS);
+                stringRedisTemplate.expire(key, TokenValidityTime, TimeUnit.SECONDS);
                 return WebResult.okResult("绑定成功");
             }
         }
@@ -123,7 +123,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
         String key = WX_USER_PREFIX.concat(openId);
         stringRedisTemplate.opsForHash().putAll(key, map);
         //设置有效期7天
-        stringRedisTemplate.expire(key, 7L, TimeUnit.DAYS);
+        stringRedisTemplate.expire(key, TokenValidityTime, TimeUnit.SECONDS);
         HashMap<String, String> tokenMap = cn.hutool.core.map.MapUtil.newHashMap();
         tokenMap.put("token", token);
         tokenMap.put("binding", binding);

@@ -4,7 +4,6 @@ import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import com.forteach.wechat.mini.app.common.WebResult;
 import com.forteach.wechat.mini.app.web.req.BindingUserInfoReq;
 import com.forteach.wechat.mini.app.web.vo.WxDataVo;
-
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -15,14 +14,6 @@ import javax.servlet.http.HttpServletRequest;
  * @Description:
  */
 public interface WeChatUserService {
-    /**
-     * 保存微信的用户信息
-     * @param saveInfoReq
-     * @param request
-     * @throws Exception
-     */
-//    WebResult saveUser(WxDataVo saveInfoReq, HttpServletRequest request) throws Exception;
-
     /**
      * 绑定微信登录学号和 openId, 进行身份校验，通过取redis 数据库比较
      * @param bindingUserInfoReq
