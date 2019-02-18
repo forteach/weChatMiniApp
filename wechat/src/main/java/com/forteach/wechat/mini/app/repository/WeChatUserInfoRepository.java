@@ -2,7 +2,7 @@ package com.forteach.wechat.mini.app.repository;
 
 import com.forteach.wechat.mini.app.domain.WeChatUserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.util.stream.Stream;
 
 /**
@@ -18,5 +18,6 @@ public interface WeChatUserInfoRepository extends JpaRepository<WeChatUserInfo, 
      * @param openId
      * @return
      */
+    @Transactional(readOnly = true)
     Stream<WeChatUserInfo> findByOpenId(String openId);
 }

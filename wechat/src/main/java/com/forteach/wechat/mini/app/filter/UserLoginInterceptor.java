@@ -5,6 +5,7 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.forteach.wechat.mini.app.annotation.PassToken;
 import com.forteach.wechat.mini.app.annotation.UserLoginToken;
+import com.forteach.wechat.mini.app.exception.UserLoginException;
 import com.forteach.wechat.mini.app.service.TokenService;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ import static com.forteach.wechat.mini.app.common.Dic.WX_USER_PREFIX;
  */
 @Slf4j
 @NoArgsConstructor
-public class SysUserLoginInterceptor implements HandlerInterceptor {
+public class UserLoginInterceptor implements HandlerInterceptor {
 
     @Autowired
     private TokenService tokenService;
@@ -45,7 +46,7 @@ public class SysUserLoginInterceptor implements HandlerInterceptor {
             return true;
         }
         HandlerMethod handlerMethod=(HandlerMethod)object;
-        Method method=handlerMethod.getMethod();
+        Method method =handlerMethod.getMethod();
         //检查是否有 passtoken注释，有则跳过认证
         if (method.isAnnotationPresent(PassToken.class)) {
             PassToken passToken = method.getAnnotation(PassToken.class);
@@ -59,23 +60,23 @@ public class SysUserLoginInterceptor implements HandlerInterceptor {
             if (userLoginToken.required()) {
                 // 执行认证
                 if (token == null) {
-                    throw new RuntimeException("无token，请重新登录");
+                    throw new UserLoginException("无token，请重新登录");
                 }
                 // 获取 token 中的 openId
                 String openId;
                 try {
                     openId = JWT.decode(token).getAudience().get(0);
                 } catch (JWTDecodeException j) {
-                    throw new RuntimeException("401");
+                    throw new UserLoginException("401");
                 }
                 if (!stringRedisTemplate.hasKey(WX_USER_PREFIX.concat(openId))) {
-                    throw new RuntimeException("用户不存在，请重新登录");
+                    throw new UserLoginException("用户不存在，请重新登录");
                 }
                 // 验证 token
                 try {
                     tokenService.verifier(openId).verify(token);
                 } catch (JWTVerificationException e) {
-                    throw new RuntimeException("401");
+                    throw new UserLoginException("401");
                 }
                 return true;
             }

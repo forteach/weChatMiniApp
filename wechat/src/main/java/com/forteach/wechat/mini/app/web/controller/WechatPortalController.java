@@ -4,6 +4,8 @@ import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaMessage;
 import cn.binarywang.wx.miniapp.constant.WxMaConstants;
 import com.forteach.wechat.mini.app.config.WeChatMiniAppConfig;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +20,12 @@ import java.util.Objects;
  * @Description: 接搜微信服务器返回的数据
  */
 @RestController
+@Api("微信验证")
 @RequestMapping("/portal/{appid}")
 public class WechatPortalController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    @ApiOperation("验证微信发送的消息是否合法")
     @GetMapping(produces = "text/plain;charset=utf-8")
     public String authGet(@PathVariable("appid") String appid,
                           @RequestParam(name = "signature", required = false) String signature,
@@ -43,6 +47,7 @@ public class WechatPortalController {
         return "非法请求";
     }
 
+    @ApiOperation("验证微信加密信息判断类型")
     @PostMapping(produces = "application/xml; charset=UTF-8")
     public String post(@PathVariable("appid") String appid,
                        @RequestBody String requestBody,

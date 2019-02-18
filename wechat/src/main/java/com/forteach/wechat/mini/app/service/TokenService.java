@@ -1,6 +1,7 @@
 package com.forteach.wechat.mini.app.service;
 
 import com.auth0.jwt.JWTVerifier;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @Auther: zhangyy
@@ -23,4 +24,18 @@ public interface TokenService {
      * @return
      */
     JWTVerifier verifier(String openId);
+
+    /**
+     * 获取微信openId
+     * @param request
+     * @return
+     */
+    String getOpenId(HttpServletRequest request);
+
+    /**
+     * 获取用户的 session-key
+     * @param openId
+     * @return
+     */
+    String getSessionKey(String openId);
 }

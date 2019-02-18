@@ -18,8 +18,6 @@ import javax.persistence.*;
  */
 @Data
 @Entity
-@DynamicInsert
-@DynamicUpdate
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor

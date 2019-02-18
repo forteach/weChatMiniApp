@@ -1,21 +1,28 @@
 package com.forteach.wechat.mini.app.service.impl;
 
+import cn.binarywang.wx.miniapp.api.WxMaService;
+import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
+import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import com.forteach.wechat.mini.app.common.WebResult;
+import com.forteach.wechat.mini.app.config.WeChatMiniAppConfig;
 import com.forteach.wechat.mini.app.domain.StudentEntitys;
 import com.forteach.wechat.mini.app.domain.WeChatUserInfo;
 import com.forteach.wechat.mini.app.repository.StudentRepository;
 import com.forteach.wechat.mini.app.repository.WeChatUserInfoRepository;
+import com.forteach.wechat.mini.app.service.TokenService;
 import com.forteach.wechat.mini.app.service.WeChatUserService;
 import com.forteach.wechat.mini.app.util.MapUtil;
 import com.forteach.wechat.mini.app.web.req.BindingUserInfoReq;
+import com.forteach.wechat.mini.app.web.vo.WxDataVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -40,53 +47,93 @@ public class WeChatUserServiceImpl implements WeChatUserService {
 
     private final StringRedisTemplate stringRedisTemplate;
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final TokenService tokenService;
 
     @Autowired
-    public WeChatUserServiceImpl(StudentRepository studentRepository, WeChatUserInfoRepository weChatUserInfoRepository, StringRedisTemplate stringRedisTemplate, RedisTemplate<String, String> redisTemplate) {
+    public WeChatUserServiceImpl(StudentRepository studentRepository,
+                                 WeChatUserInfoRepository weChatUserInfoRepository,
+                                 StringRedisTemplate stringRedisTemplate,
+                                 TokenService tokenService) {
         this.studentRepository = studentRepository;
         this.weChatUserInfoRepository = weChatUserInfoRepository;
         this.stringRedisTemplate = stringRedisTemplate;
-        this.redisTemplate = redisTemplate;
-    }
-
-    /**
-     * 保存用户通过微信登录进来的信息到mysql 和 redis(设置７天有效期)
-     * @param wxMaUserInfo
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void saveUser(WxMaUserInfo wxMaUserInfo){
-        // 需要更新用户数据信息
-        Optional<WeChatUserInfo> optionalWeChatUserInfo = weChatUserInfoRepository.findByOpenId(wxMaUserInfo.getOpenId()).findFirst();
-        WeChatUserInfo weChatUserInfo = optionalWeChatUserInfo.orElseGet(WeChatUserInfo::new);
-        BeanUtils.copyProperties(wxMaUserInfo, weChatUserInfo);
-        weChatUserInfoRepository.save(weChatUserInfo);
-        //保存redis 设置有效期7天
-        Map<String, Object> map = MapUtil.objectToMap(weChatUserInfo);
-        String key = WX_USER_PREFIX + wxMaUserInfo.getOpenId();
-        stringRedisTemplate.opsForHash().putAll(key, map);
-        stringRedisTemplate.expire(key, 7, TimeUnit.DAYS);
+        this.tokenService = tokenService;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public WebResult bindingUserInfo(BindingUserInfoReq bindingUserInfoReq) {
+    public WebResult bindingUserInfo(BindingUserInfoReq bindingUserInfoReq, HttpServletRequest request) {
         Optional<StudentEntitys> studentEntitys = studentRepository.findByIsValidatedEqualsAndIdCardNo(TAKE_EFFECT_OPEN, bindingUserInfoReq.getIdCardNo())
                 .stream()
                 .filter(Objects::nonNull)
                 .findFirst();
         if (studentEntitys.isPresent()) {
-            WeChatUserInfo weChatUserInfo = weChatUserInfoRepository.findByOpenId(bindingUserInfoReq.getOpenId()).filter(Objects::nonNull).findFirst().get();
-            if (WX_INFO_BINDIND_0.equals(weChatUserInfo.getBinding())){
+            Optional<WeChatUserInfo> weChatUserInfoOptional = weChatUserInfoRepository.findByOpenId(tokenService.getOpenId(request)).filter(Objects::nonNull).findFirst();
+            if (WX_INFO_BINDIND_0.equals(weChatUserInfoOptional.get().getBinding())) {
                 return WebResult.failException("该微信账号已经认证");
             }
             if (checkStudent(bindingUserInfoReq, studentEntitys.get())) {
+                final WxMaService wxService = WeChatMiniAppConfig.getMaService();
+                String openId = tokenService.getOpenId(request);
+                String sessionKey = tokenService.getSessionKey(openId);
+                String key = WX_USER_PREFIX + openId;
+                // 用户信息校验
+                if (!wxService.getUserService().checkUserInfo(sessionKey, bindingUserInfoReq.getRawData(), bindingUserInfoReq.getSignature())) {
+                    return WebResult.failException("user check failed");
+                }
+                // 解密用户信息
+                WxMaUserInfo wxMaUserInfo = wxService.getUserService().getUserInfo(sessionKey, bindingUserInfoReq.getEncryptedData(), bindingUserInfoReq.getIv());
+                // 需要更新用户数据信息
+                Optional<WeChatUserInfo> optionalWeChatUserInfo = weChatUserInfoRepository.findByOpenId(openId).findFirst();
+                WeChatUserInfo weChatUserInfo = optionalWeChatUserInfo.orElseGet(WeChatUserInfo::new);
+                BeanUtils.copyProperties(wxMaUserInfo, weChatUserInfo);
+                weChatUserInfoRepository.save(weChatUserInfo);
+                //保存redis 设置有效期7天
+                Map<String, Object> map = MapUtil.objectToMap(weChatUserInfo);
+                stringRedisTemplate.opsForHash().putAll(key, map);
+                stringRedisTemplate.expire(key, 7, TimeUnit.DAYS);
                 this.updateWeChatBindingInfo(weChatUserInfo, studentEntitys.get());
                 return WebResult.okResult("绑定成功");
             }
         }
         return WebResult.failException("身份信息不符, 请联系管理员");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public WebResult bindingToken(WxMaJscode2SessionResult session) {
+        String openId = session.getOpenid();
+        HashMap<String, String> map = cn.hutool.core.map.MapUtil.newHashMap();
+        String token = tokenService.createToken(openId);
+        map.put("openId", openId);
+        map.put("sessionKey", openId);
+        map.put("token", token);
+        String binding = WX_INFO_BINDIND_1;
+        Optional<WeChatUserInfo> weChatUserInfoOptional = weChatUserInfoRepository.findByOpenId(openId).findFirst();
+        if (weChatUserInfoOptional.isPresent()){
+            binding = weChatUserInfoOptional.get().getBinding();
+        }
+        String key = WX_USER_PREFIX.concat(openId);
+        stringRedisTemplate.opsForHash().putAll(key, map);
+        //设置有效期7天
+        stringRedisTemplate.expire(key, 7L, TimeUnit.DAYS);
+        HashMap<String, String> tokenMap = cn.hutool.core.map.MapUtil.newHashMap();
+        tokenMap.put("token", token);
+        tokenMap.put("binding", binding);
+        return WebResult.okResult(tokenMap);
+    }
+
+    @Override
+    public WebResult getBindingPhone(WxDataVo wxDataVo, HttpServletRequest request) {
+        final WxMaService wxService = WeChatMiniAppConfig.getMaService();
+        String openId = tokenService.getOpenId(request);
+        String sessionKey = tokenService.getSessionKey(openId);
+        // 用户信息校验
+        if (!wxService.getUserService().checkUserInfo(sessionKey, wxDataVo.getRawData(), wxDataVo.getSignature())) {
+            return WebResult.failException("user check failed");
+        }
+        WxMaPhoneNumberInfo phoneNoInfo = wxService.getUserService().getPhoneNoInfo(sessionKey, wxDataVo.getEncryptedData(), wxDataVo.getIv());
+        return WebResult.okResult(phoneNoInfo);
     }
 
     /**
