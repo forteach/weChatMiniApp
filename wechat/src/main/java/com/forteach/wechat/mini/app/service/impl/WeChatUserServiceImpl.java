@@ -144,17 +144,6 @@ public class WeChatUserServiceImpl implements WeChatUserService {
     }
 
     /**
-     * 保存用户微信绑定的信息
-     * @param weChatUserInfo
-     * @param studentEntitys
-     */
-    private void updateWeChatBindingInfo(WeChatUserInfo weChatUserInfo, StudentEntitys studentEntitys) {
-        weChatUserInfo.setStudentId(studentEntitys.getId());
-        weChatUserInfo.setBinding(WX_INFO_BINDIND_0);
-        weChatUserInfoRepository.save(weChatUserInfo);
-    }
-
-    /**
      * 校验身份证和姓名在数据库中是否存在
      * @param bindingUserInfoReq
      * @param studentEntitys
@@ -172,7 +161,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
      * @param bindingUserInfoReq
      * @return
      */
-    private boolean checkWxInfo(String sessionKey,WxMaService wxService, BindingUserInfoReq bindingUserInfoReq){
+    private boolean checkWxInfo(String sessionKey, WxMaService wxService, BindingUserInfoReq bindingUserInfoReq){
         if (StrUtil.isNotBlank(bindingUserInfoReq.getEncryptedData())
                 && StrUtil.isNotBlank(bindingUserInfoReq.getSignature())
                 && StrUtil.isNotBlank(bindingUserInfoReq.getIv())

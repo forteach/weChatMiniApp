@@ -60,10 +60,11 @@ public class UserLoginInterceptor implements HandlerInterceptor {
             if (userLoginToken.required()) {
                 // 执行认证
                 if (token == null) {
+                    log.error("token is null");
                     throw new UserLoginException("无token，请重新登录");
                 }
                 // 获取 token 中的 openId
-                String openId;
+                String openId = "";
                 try {
                     openId = JWT.decode(token).getAudience().get(0);
                 } catch (JWTDecodeException j) {
