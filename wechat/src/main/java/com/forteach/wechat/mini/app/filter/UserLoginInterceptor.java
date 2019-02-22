@@ -14,12 +14,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
-
-import static com.forteach.wechat.mini.app.common.Dic.WX_USER_PREFIX;
+import static com.forteach.wechat.mini.app.common.Dic.USER_PREFIX;
 
 /**
  * @Description:
@@ -64,13 +62,13 @@ public class UserLoginInterceptor implements HandlerInterceptor {
                     throw new UserLoginException("无token，请重新登录");
                 }
                 // 获取 token 中的 openId
-                String openId = "";
+                String openId;
                 try {
                     openId = JWT.decode(token).getAudience().get(0);
                 } catch (JWTDecodeException j) {
                     throw new UserLoginException("401");
                 }
-                if (!stringRedisTemplate.hasKey(WX_USER_PREFIX.concat(openId))) {
+                if (!stringRedisTemplate.hasKey(USER_PREFIX.concat(openId))) {
                     throw new UserLoginException("用户不存在，请重新登录");
                 }
                 // 验证 token

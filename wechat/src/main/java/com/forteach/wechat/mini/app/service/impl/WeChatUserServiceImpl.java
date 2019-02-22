@@ -81,7 +81,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
                 final WxMaService wxService = WeChatMiniAppConfig.getMaService();
                 String openId = tokenService.getOpenId(request);
                 String sessionKey = tokenService.getSessionKey(openId);
-                String key = WX_USER_PREFIX + openId;
+                String key = USER_PREFIX.concat(openId);
                 // 用户信息校验
                 WxMaUserInfo wxMaUserInfo = null;
                 if (checkWxInfo(sessionKey, wxService, bindingUserInfoReq)) {
@@ -98,8 +98,10 @@ public class WeChatUserServiceImpl implements WeChatUserService {
                 weChatUserInfoRepository.save(weChatUserInfo);
                 //保存redis 设置有效期7天
                 Map<String, Object> map = MapUtil.objectToMap(weChatUserInfo);
+                //设置token类型为学生微信登录
+                map.put("type", TOKEN_STUDENT);
                 stringRedisTemplate.opsForHash().putAll(key, map);
-                stringRedisTemplate.expire(key, TokenValidityTime, TimeUnit.SECONDS);
+                stringRedisTemplate.expire(key, TOKEN_VALIDITY_TIME, TimeUnit.SECONDS);
                 return WebResult.okResult("绑定成功");
             }
         }
@@ -120,10 +122,10 @@ public class WeChatUserServiceImpl implements WeChatUserService {
         if (weChatUserInfoOptional.isPresent()){
             binding = weChatUserInfoOptional.get().getBinding();
         }
-        String key = WX_USER_PREFIX.concat(openId);
+        String key = USER_PREFIX.concat(openId);
         stringRedisTemplate.opsForHash().putAll(key, map);
         //设置有效期7天
-        stringRedisTemplate.expire(key, TokenValidityTime, TimeUnit.SECONDS);
+        stringRedisTemplate.expire(key, TOKEN_VALIDITY_TIME, TimeUnit.SECONDS);
         HashMap<String, String> tokenMap = cn.hutool.core.map.MapUtil.newHashMap();
         tokenMap.put("token", token);
         tokenMap.put("binding", binding);
