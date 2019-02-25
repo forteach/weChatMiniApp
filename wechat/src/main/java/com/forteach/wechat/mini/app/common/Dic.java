@@ -67,6 +67,9 @@ public class Dic {
      */
     public final static String TOKEN_STUDENT ="student";
 
+    /**
+     * 用户登录后获取的 token 有效期7天
+     */
     public final static Long TOKEN_VALIDITY_TIME = 3600L * 24 * 7;
     /**
      * 微信登录用户是否绑定信息标识 0 (绑定)　1(未绑定)

@@ -36,6 +36,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public String createToken(String openId) {
         return JWT.create()
+                .withIssuedAt(new Date())
                 .withAudience(openId, TOKEN_STUDENT)
                 .withExpiresAt(new Date(System.currentTimeMillis() + TOKEN_VALIDITY_TIME * 1000))
                 .sign(Algorithm.HMAC256(salt.concat(openId)));

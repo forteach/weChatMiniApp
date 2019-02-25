@@ -73,8 +73,8 @@ public class WeChatUserServiceImpl implements WeChatUserService {
                     .stream()
                     .filter(Objects::nonNull)
                     .findFirst();
-            if (weChatUserInfoOptional.isPresent() && WX_INFO_BINDIND_0.equals(weChatUserInfoOptional.get().getBinding())){
-                    return WebResult.failException("该微信账号已经认证");
+            if (weChatUserInfoOptional.isPresent() && WX_INFO_BINDIND_0.equals(weChatUserInfoOptional.get().getBinding())) {
+                return WebResult.failException("该微信账号已经认证");
             }
             WeChatUserInfo weChatUserInfo = weChatUserInfoOptional.orElseGet(WeChatUserInfo::new);
             if (checkStudent(bindingUserInfoReq, studentEntitys.get())) {
@@ -89,7 +89,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
                     wxMaUserInfo = wxService.getUserService().getUserInfo(sessionKey, bindingUserInfoReq.getEncryptedData(), bindingUserInfoReq.getIv());
                 }
                 // 需要更新用户数据信息
-                if (wxMaUserInfo != null){
+                if (wxMaUserInfo != null) {
                     BeanUtils.copyProperties(wxMaUserInfo, weChatUserInfo);
                 }
                 weChatUserInfo.setBinding(WX_INFO_BINDIND_0);
@@ -119,7 +119,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
         map.put("token", token);
         String binding = WX_INFO_BINDIND_1;
         Optional<WeChatUserInfo> weChatUserInfoOptional = weChatUserInfoRepository.findByOpenId(openId).stream().findFirst();
-        if (weChatUserInfoOptional.isPresent()){
+        if (weChatUserInfoOptional.isPresent()) {
             binding = weChatUserInfoOptional.get().getBinding();
         }
         String key = USER_PREFIX.concat(openId);
@@ -151,7 +151,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
      * @param studentEntitys
      * @return
      */
-    private boolean checkStudent(BindingUserInfoReq bindingUserInfoReq, StudentEntitys studentEntitys){
+    private boolean checkStudent(BindingUserInfoReq bindingUserInfoReq, StudentEntitys studentEntitys) {
         return studentEntitys.getUserName().equals(bindingUserInfoReq.getUserName())
                 && studentEntitys.getIdCardNo().equals(bindingUserInfoReq.getIdCardNo());
     }
@@ -163,11 +163,11 @@ public class WeChatUserServiceImpl implements WeChatUserService {
      * @param bindingUserInfoReq
      * @return
      */
-    private boolean checkWxInfo(String sessionKey, WxMaService wxService, BindingUserInfoReq bindingUserInfoReq){
+    private boolean checkWxInfo(String sessionKey, WxMaService wxService, BindingUserInfoReq bindingUserInfoReq) {
         if (StrUtil.isNotBlank(bindingUserInfoReq.getEncryptedData())
                 && StrUtil.isNotBlank(bindingUserInfoReq.getSignature())
                 && StrUtil.isNotBlank(bindingUserInfoReq.getIv())
-                && StrUtil.isNotBlank(bindingUserInfoReq.getRawData())){
+                && StrUtil.isNotBlank(bindingUserInfoReq.getRawData())) {
             return wxService.getUserService().checkUserInfo(sessionKey,
                     bindingUserInfoReq.getRawData(), bindingUserInfoReq.getSignature());
         }
