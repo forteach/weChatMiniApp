@@ -112,16 +112,16 @@ public class WeChatUserServiceImpl implements WeChatUserService {
     @Transactional(rollbackFor = Exception.class)
     public WebResult bindingToken(WxMaJscode2SessionResult session) {
         String openId = session.getOpenid();
-        HashMap<String, String> map = cn.hutool.core.map.MapUtil.newHashMap();
         String token = tokenService.createToken(openId);
-        map.put("openId", openId);
-        map.put("sessionKey", openId);
-        map.put("token", token);
         String binding = WX_INFO_BINDIND_1;
         Optional<WeChatUserInfo> weChatUserInfoOptional = weChatUserInfoRepository.findByOpenId(openId).stream().findFirst();
         if (weChatUserInfoOptional.isPresent()) {
             binding = weChatUserInfoOptional.get().getBinding();
         }
+        Map<String, Object> map = MapUtil.objectToMap(weChatUserInfoOptional.get());
+        map.put("openId", openId);
+        map.put("sessionKey", openId);
+        map.put("token", token);
         String key = USER_PREFIX.concat(openId);
         stringRedisTemplate.opsForHash().putAll(key, map);
         //设置有效期7天

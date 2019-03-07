@@ -23,8 +23,8 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "wx_userinfo", indexes = {
-        @Index(columnList = "id"),
-        @Index(columnList = "open_id")
+        @Index(columnList = "id", name = "id_index"),
+        @Index(columnList = "open_id", name = "open_id_index")
 })
 @EqualsAndHashCode(callSuper = true)
 @org.hibernate.annotations.Table(appliesTo = "wx_userinfo", comment = "微信用户信息")
