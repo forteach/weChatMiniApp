@@ -20,11 +20,9 @@ import javax.validation.constraints.NotBlank;
 @ApiModel(value = "绑定学生用户登录微信信息")
 public class BindingUserInfoReq extends WxDataVo {
 
-    @NotBlank(message = "用户名不为空")
     @ApiModelProperty(value = "用户名", name = "userName")
     private String userName;
 
-    @NotBlank(message = "身份证号码不为空")
     @ApiModelProperty(value = "身份证号码", name = "idCardNo")
     private String idCardNo;
 }

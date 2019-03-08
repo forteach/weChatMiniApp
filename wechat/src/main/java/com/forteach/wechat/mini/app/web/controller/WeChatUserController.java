@@ -2,8 +2,10 @@ package com.forteach.wechat.mini.app.web.controller;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
-import cn.hutool.core.util.StrUtil;
+import com.forteach.wechat.mini.app.annotation.PassToken;
 import com.forteach.wechat.mini.app.annotation.UserLoginToken;
+import com.forteach.wechat.mini.app.common.DefineCode;
+import com.forteach.wechat.mini.app.common.MyAssert;
 import com.forteach.wechat.mini.app.common.WebResult;
 import com.forteach.wechat.mini.app.config.WeChatMiniAppConfig;
 import com.forteach.wechat.mini.app.service.WeChatUserService;
@@ -18,9 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 
 
 /**
@@ -48,10 +48,9 @@ public class WeChatUserController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "code", value = "微信登录凭证(code)", dataType = "string", required = true, paramType = "query")
     })
+    @PassToken
     public WebResult login(String code){
-        if (StrUtil.isBlank(code)){
-            return WebResult.failException("code NotBlank");
-        }
+        MyAssert.blank(code, DefineCode.ERR0010, "code is null");
         final WxMaService wxService = WeChatMiniAppConfig.getMaService();
         try {
             WxMaJscode2SessionResult session = wxService.getUserService().getSessionInfo(code);
@@ -61,7 +60,7 @@ public class WeChatUserController {
             return weChatUserService.bindingToken(session);
         } catch (WxErrorException e) {
             this.logger.error(e.getMessage(), e);
-            return WebResult.failException(e.toString());
+            return WebResult.failException(e.getMessage());
         }
     }
 
@@ -90,7 +89,9 @@ public class WeChatUserController {
             @ApiImplicitParam(name = "encryptedData", value = "加密数据", dataType = "string", paramType = "from"),
             @ApiImplicitParam(name = "iv", value = "数据接口返回", dataType = "string", paramType = "from"),
     })
-    public WebResult binding(@Valid @RequestBody BindingUserInfoReq bindingUserInfoReq, HttpServletRequest request){
+    public WebResult binding(@RequestBody BindingUserInfoReq bindingUserInfoReq, HttpServletRequest request){
+        MyAssert.blank(bindingUserInfoReq.getIdCardNo(), DefineCode.ERR0010, "身份证号码不为空");
+        MyAssert.blank(bindingUserInfoReq.getUserName(), DefineCode.ERR0010, "用户名不为空");
         return weChatUserService.bindingUserInfo(bindingUserInfoReq, request);
     }
 }
