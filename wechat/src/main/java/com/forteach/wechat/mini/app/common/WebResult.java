@@ -105,6 +105,13 @@ public class WebResult implements Serializable {
         return failResult(getFailCode(), String.valueOf(code), data);
     }
 
+    /**
+     * 失败操作 操作码默认为9999  只有提示码 和 数据
+     **/
+    public static WebResult failResult(int code, String msg) {
+        return getWebResult(code, msg);
+    }
+
     public static WebResult failResult(int code, String windowCode, Object object) {
         return getWebResult(code, windowCode, object);
     }
@@ -115,6 +122,15 @@ public class WebResult implements Serializable {
         wr.setData(object);
         wr.setRet(code);
         wr.setMsg(propertiesmap.get(Integer.valueOf(windowCode) + "[msg]"));
+        return wr;
+    }
+
+    private static WebResult getWebResult(int code, String msg) {
+        Map<String, String> propertiesmap = PropertiesUtil.getMapForProperties();
+        WebResult wr = new WebResult();
+        wr.setData("");
+        wr.setRet(code);
+        wr.setMsg(msg);
         return wr;
     }
 

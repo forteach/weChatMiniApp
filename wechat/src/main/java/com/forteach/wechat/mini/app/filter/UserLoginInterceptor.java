@@ -3,9 +3,11 @@ package com.forteach.wechat.mini.app.filter;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.forteach.wechat.mini.app.annotation.PassToken;
 import com.forteach.wechat.mini.app.annotation.UserLoginToken;
-import com.forteach.wechat.mini.app.exception.UserLoginException;
+import com.forteach.wechat.mini.app.common.DefineCode;
+import com.forteach.wechat.mini.app.common.MyAssert;
 import com.forteach.wechat.mini.app.service.TokenService;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,9 +16,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
+
 import static com.forteach.wechat.mini.app.common.Dic.USER_PREFIX;
 
 /**
@@ -36,6 +40,7 @@ public class UserLoginInterceptor implements HandlerInterceptor {
     private StringRedisTemplate stringRedisTemplate;
 
     @Override
+    @SuppressWarnings(value = "all")
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object object) throws Exception {
         // 从 http 请求头中取出 token
         String token = httpServletRequest.getHeader("token");
@@ -57,25 +62,31 @@ public class UserLoginInterceptor implements HandlerInterceptor {
             UserLoginToken userLoginToken = method.getAnnotation(UserLoginToken.class);
             if (userLoginToken.required()) {
                 // 执行认证
-                if (token == null) {
-                    log.error("token is null");
-                    throw new UserLoginException("无token，请重新登录");
-                }
+                MyAssert.blank(token, DefineCode.ERR0004, "token is null");
                 // 获取 token 中的 openId
-                String openId;
+                String openId = null;
                 try {
                     openId = JWT.decode(token).getAudience().get(0);
                 } catch (JWTDecodeException j) {
-                    throw new UserLoginException("401");
+                    if (log.isErrorEnabled()){
+                        log.error("token 校验非法 401");
+                    }
+                    MyAssert.fail(DefineCode.ERR0004, j, "401");
                 }
                 if (!stringRedisTemplate.hasKey(USER_PREFIX.concat(openId))) {
-                    throw new UserLoginException("用户不存在，请重新登录");
+                    if (log.isErrorEnabled()){
+                        log.error("token 已经过期，请重新登录");
+                    }
+                    MyAssert.fail(DefineCode.ERR0004, new TokenExpiredException("token 已经过期，请重新登录"), "token 已经过期，请重新登录");
                 }
                 // 验证 token
                 try {
                     tokenService.verifier(openId).verify(token);
                 } catch (JWTVerificationException e) {
-                    throw new UserLoginException("401");
+                    if (log.isErrorEnabled()){
+                        log.error("token 非法无效 401");
+                    }
+                    MyAssert.fail(DefineCode.ERR0004, e, "非法 token");
                 }
                 return true;
             }
