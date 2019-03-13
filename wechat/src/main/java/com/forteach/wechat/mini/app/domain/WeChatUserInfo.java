@@ -20,8 +20,6 @@ import javax.persistence.*;
 @Entity
 @DynamicInsert
 @DynamicUpdate
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "wx_userinfo", indexes = {
         @Index(columnList = "id", name = "id_index"),
         @Index(columnList = "open_id", name = "open_id_index")
@@ -65,4 +63,20 @@ public class WeChatUserInfo extends Entitys {
 
     @Column(name = "binding", columnDefinition = "CHAR(1) DEFAULT 1 COMMENT '绑定标识 0 绑定 1　未绑定'")
     private String binding;
+
+    public WeChatUserInfo() {
+    }
+
+    public WeChatUserInfo(String openId, String nickName, String gender, String language, String city, String province, String country, String avatarUrl, String studentId, String binding) {
+        this.openId = openId;
+        this.nickName = nickName;
+        this.gender = gender;
+        this.language = language;
+        this.city = city;
+        this.province = province;
+        this.country = country;
+        this.avatarUrl = avatarUrl;
+        this.studentId = studentId;
+        this.binding = binding;
+    }
 }

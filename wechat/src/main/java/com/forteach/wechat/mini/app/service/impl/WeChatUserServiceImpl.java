@@ -118,10 +118,11 @@ public class WeChatUserServiceImpl implements WeChatUserService {
         if (weChatUserInfoOptional.isPresent()) {
             binding = weChatUserInfoOptional.get().getBinding();
         }
-        Map<String, Object> map = MapUtil.objectToMap(weChatUserInfoOptional.get());
+        Map<String, Object> map = MapUtil.objectToMap(weChatUserInfoOptional.orElse(new WeChatUserInfo()));
         map.put("openId", openId);
         map.put("sessionKey", openId);
         map.put("token", token);
+        map.put("binding", binding);
         String key = USER_PREFIX.concat(openId);
         stringRedisTemplate.opsForHash().putAll(key, map);
         //设置有效期7天
