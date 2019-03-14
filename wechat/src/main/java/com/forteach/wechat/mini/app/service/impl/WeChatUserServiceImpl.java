@@ -130,6 +130,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
         HashMap<String, String> tokenMap = cn.hutool.core.map.MapUtil.newHashMap();
         tokenMap.put("token", token);
         tokenMap.put("binding", binding);
+        tokenMap.put("studentId", weChatUserInfoOptional.orElse(new WeChatUserInfo()).getStudentId());
         return WebResult.okResult(tokenMap);
     }
 
