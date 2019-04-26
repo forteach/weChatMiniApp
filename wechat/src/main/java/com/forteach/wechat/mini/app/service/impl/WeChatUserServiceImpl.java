@@ -147,6 +147,18 @@ public class WeChatUserServiceImpl implements WeChatUserService {
         return WebResult.okResult(phoneNoInfo);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public WebResult restart(String string) {
+        weChatUserInfoRepository.findByStudentId(string)
+                .stream()
+                .filter(Objects::nonNull)
+                .forEach(weChatUserInfo -> {
+                    weChatUserInfoRepository.delete(weChatUserInfo);
+                });
+        return WebResult.okResult();
+    }
+
     /**
      * 校验身份证和姓名在数据库中是否存在
      * @param bindingUserInfoReq

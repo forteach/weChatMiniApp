@@ -32,4 +32,6 @@ public interface WeChatUserService {
      * 获取绑定手机号码信息
      */
     WebResult getBindingPhone(WxDataVo wxDataVo, HttpServletRequest request);
+
+    WebResult restart(String string);
 }

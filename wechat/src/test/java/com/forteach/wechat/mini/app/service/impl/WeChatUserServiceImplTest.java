@@ -40,7 +40,7 @@ public class WeChatUserServiceImplTest {
     @Test
     public void saveUser() {
         List<StudentEntitys> list = new ArrayList<>();
-        for (int i = 10000; i < 10101; i++) {
+        for (int i = 10001; i < 10101; i++) {
             StudentEntitys studentEntitys = new StudentEntitys();
             studentEntitys.setId(String.valueOf(i));
             studentEntitys.setIdCardNo(String.valueOf(i));

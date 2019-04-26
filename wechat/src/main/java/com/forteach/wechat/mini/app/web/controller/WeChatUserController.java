@@ -2,6 +2,7 @@ package com.forteach.wechat.mini.app.web.controller;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
+import com.alibaba.fastjson.JSONObject;
 import com.forteach.wechat.mini.app.annotation.PassToken;
 import com.forteach.wechat.mini.app.annotation.UserLoginToken;
 import com.forteach.wechat.mini.app.common.DefineCode;
@@ -93,5 +94,11 @@ public class WeChatUserController {
         MyAssert.blank(bindingUserInfoReq.getIdCardNo(), DefineCode.ERR0010, "身份证号码不为空");
         MyAssert.blank(bindingUserInfoReq.getUserName(), DefineCode.ERR0010, "用户名不为空");
         return weChatUserService.bindingUserInfo(bindingUserInfoReq, request);
+    }
+
+    @DeleteMapping("/restart")
+    public WebResult restart(@RequestBody String studentId){
+        String string = JSONObject.parseObject(studentId).getString("studentId");
+        return weChatUserService.restart(string);
     }
 }

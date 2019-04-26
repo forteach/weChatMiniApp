@@ -35,4 +35,7 @@ public class StudentEntitys extends Entitys {
     @Column(name = "id_card_no", columnDefinition = "VARCHAR(32) COMMENT '身份证号码'")
     private String idCardNo;
 
+    @Column(name = "class_id", columnDefinition = "VARCHAR(32) COMMENT '学生所属班级id'")
+    private String classId;
+
 }
