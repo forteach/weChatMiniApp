@@ -3,7 +3,6 @@ package com.forteach.wechat.mini.app.web.controller;
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import com.alibaba.fastjson.JSONObject;
-import com.forteach.wechat.mini.app.annotation.PassToken;
 import com.forteach.wechat.mini.app.annotation.UserLoginToken;
 import com.forteach.wechat.mini.app.common.DefineCode;
 import com.forteach.wechat.mini.app.common.MyAssert;
@@ -21,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletRequest;
 
 
@@ -49,7 +49,6 @@ public class WeChatUserController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "code", value = "微信登录凭证(code)", dataType = "string", required = true, paramType = "query")
     })
-    @PassToken
     public WebResult login(String code){
         MyAssert.blank(code, DefineCode.ERR0010, "code is null");
         final WxMaService wxService = WeChatMiniAppConfig.getMaService();
@@ -96,6 +95,11 @@ public class WeChatUserController {
         return weChatUserService.bindingUserInfo(bindingUserInfoReq, request);
     }
 
+    /**
+     * todo delete
+     * @param studentId
+     * @return
+     */
     @DeleteMapping("/restart")
     public WebResult restart(@RequestBody String studentId){
         String string = JSONObject.parseObject(studentId).getString("studentId");
