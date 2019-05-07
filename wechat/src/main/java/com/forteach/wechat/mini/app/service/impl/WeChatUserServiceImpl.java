@@ -95,6 +95,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
                 }
                 weChatUserInfo.setBinding(WX_INFO_BINDIND_0);
                 weChatUserInfo.setStudentId(studentEntitys.get().getId());
+                weChatUserInfo.setClassId(studentEntitys.get().getClassId());
                 weChatUserInfo.setOpenId(openId);
                 weChatUserInfoRepository.save(weChatUserInfo);
                 //保存redis 设置有效期7天

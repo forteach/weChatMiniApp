@@ -22,7 +22,8 @@ import javax.persistence.*;
 @DynamicUpdate
 @Table(name = "wx_userinfo", indexes = {
         @Index(columnList = "id", name = "id_index"),
-        @Index(columnList = "open_id", name = "open_id_index")
+        @Index(columnList = "open_id", name = "open_id_index"),
+        @Index(columnList = "student_id", name = "student_id_index")
 })
 @EqualsAndHashCode(callSuper = true)
 @org.hibernate.annotations.Table(appliesTo = "wx_userinfo", comment = "微信用户信息")
@@ -63,6 +64,9 @@ public class WeChatUserInfo extends Entitys {
 
     @Column(name = "binding", columnDefinition = "CHAR(1) DEFAULT 1 COMMENT '绑定标识 0 绑定 1　未绑定'")
     private String binding;
+
+    @Column(name = "class_id", columnDefinition = "VARCHAR(32) COMMENT '班级id'")
+    private String classId;
 
     public WeChatUserInfo() {
     }
