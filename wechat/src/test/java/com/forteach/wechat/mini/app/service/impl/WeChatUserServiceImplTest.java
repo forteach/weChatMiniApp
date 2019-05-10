@@ -45,6 +45,8 @@ public class WeChatUserServiceImplTest {
             studentEntitys.setId(String.valueOf(i));
             studentEntitys.setIdCardNo(String.valueOf(i));
             studentEntitys.setUserName(String.valueOf(i));
+            studentEntitys.setClassId(String.valueOf(i));
+            studentEntitys.setPortrait("https://cdn.v2ex.com/gravatar/"+ DigestUtils.md5Hex(String.valueOf(i)) +".jpg?s=100&d=identicon");
             list.add(studentEntitys);
         }
         studentRepository.saveAll(list);

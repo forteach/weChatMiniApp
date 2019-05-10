@@ -1,9 +1,7 @@
 package com.forteach.wechat.mini.app.domain;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import javax.persistence.*;
@@ -17,12 +15,14 @@ import javax.persistence.*;
  */
 @Data
 @Entity
+@EqualsAndHashCode(callSuper = true)
 @DynamicInsert
 @DynamicUpdate
-@EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "student_info",indexes = {@Index(columnList = "id"), @Index(columnList = "id_card_no")})
+@Table(name = "student_info",indexes = {
+        @Index(columnList = "id", name = "id_index"),
+        @Index(columnList = "id_card_no", name = "id_card_no_index"),
+        @Index(columnList = "class_id", name = "class_id_index")
+})
 @org.hibernate.annotations.Table(appliesTo = "student_info", comment = "从学校数据库查询的学生信息")
 public class StudentEntitys extends Entitys {
     @Id
@@ -35,7 +35,20 @@ public class StudentEntitys extends Entitys {
     @Column(name = "id_card_no", columnDefinition = "VARCHAR(32) COMMENT '身份证号码'")
     private String idCardNo;
 
+    @Column(name = "portrait", columnDefinition = "VARCHAR(255) COMMENT '学生头像url'")
+    private String portrait;
+
     @Column(name = "class_id", columnDefinition = "VARCHAR(32) COMMENT '学生所属班级id'")
     private String classId;
 
+    public StudentEntitys() {
+    }
+
+    public StudentEntitys(String id, String userName, String idCardNo, String classId, String portrait) {
+        this.id = id;
+        this.userName = userName;
+        this.idCardNo = idCardNo;
+        this.classId = classId;
+        this.portrait = portrait;
+    }
 }
