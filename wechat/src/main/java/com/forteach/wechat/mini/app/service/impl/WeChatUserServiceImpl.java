@@ -7,8 +7,10 @@ import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import cn.hutool.core.util.StrUtil;
 import com.forteach.wechat.mini.app.common.WebResult;
 import com.forteach.wechat.mini.app.config.WeChatMiniAppConfig;
+import com.forteach.wechat.mini.app.domain.Classes;
 import com.forteach.wechat.mini.app.domain.StudentEntitys;
 import com.forteach.wechat.mini.app.domain.WeChatUserInfo;
+import com.forteach.wechat.mini.app.repository.ClassesRepository;
 import com.forteach.wechat.mini.app.repository.StudentRepository;
 import com.forteach.wechat.mini.app.repository.WeChatUserInfoRepository;
 import com.forteach.wechat.mini.app.service.TokenService;
@@ -51,15 +53,19 @@ public class WeChatUserServiceImpl implements WeChatUserService {
 
     private final TokenService tokenService;
 
+    private final ClassesRepository classesRepository;
+
     @Autowired
     public WeChatUserServiceImpl(StudentRepository studentRepository,
                                  WeChatUserInfoRepository weChatUserInfoRepository,
                                  StringRedisTemplate stringRedisTemplate,
+                                 ClassesRepository classesRepository,
                                  TokenService tokenService) {
         this.studentRepository = studentRepository;
         this.weChatUserInfoRepository = weChatUserInfoRepository;
         this.stringRedisTemplate = stringRedisTemplate;
         this.tokenService = tokenService;
+        this.classesRepository = classesRepository;
     }
 
     @Override
@@ -130,8 +136,18 @@ public class WeChatUserServiceImpl implements WeChatUserService {
         //设置有效期7天
         stringRedisTemplate.expire(key, TOKEN_VALIDITY_TIME, TimeUnit.SECONDS);
         HashMap<String, String> tokenMap = cn.hutool.core.map.MapUtil.newHashMap();
+        String classId = weChatUserInfoOptional.orElse(new WeChatUserInfo()).getClassId();
+        String className = "";
+        if (StrUtil.isNotBlank(classId)){
+            Optional<Classes> optionalS = classesRepository.findById(classId);
+            if (optionalS.isPresent()){
+                className = optionalS.get().getClassName();
+            }
+        }
         tokenMap.put("token", token);
         tokenMap.put("binding", binding);
+        tokenMap.put("classId", classId);
+        tokenMap.put("className", className);
         tokenMap.put("studentId", weChatUserInfoOptional.orElse(new WeChatUserInfo()).getStudentId());
         return WebResult.okResult(tokenMap);
     }

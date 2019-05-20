@@ -1,7 +1,9 @@
 package com.forteach.wechat.mini.app.repository;
 
 import com.forteach.wechat.mini.app.domain.WeChatUserInfo;
+import com.forteach.wechat.mini.app.dto.IWeChatUserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
@@ -28,4 +30,5 @@ public interface WeChatUserInfoRepository extends JpaRepository<WeChatUserInfo, 
      */
     @Transactional(readOnly = true)
     List<WeChatUserInfo> findByStudentId(String studentId);
+
 }

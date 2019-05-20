@@ -100,7 +100,7 @@ public class WeChatUserController {
      * @param studentId
      * @return
      */
-    @DeleteMapping("/restart")
+    @GetMapping("/restart")
     public WebResult restart(@RequestBody String studentId){
         String string = JSONObject.parseObject(studentId).getString("studentId");
         return weChatUserService.restart(string);
