@@ -3,6 +3,7 @@ package com.forteach.wechat.mini.app.service;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import com.forteach.wechat.mini.app.common.WebResult;
 import com.forteach.wechat.mini.app.web.req.BindingUserInfoReq;
+import com.forteach.wechat.mini.app.web.req.WeChatUserInfoReq;
 import com.forteach.wechat.mini.app.web.vo.WxDataVo;
 import javax.servlet.http.HttpServletRequest;
 
@@ -34,4 +35,6 @@ public interface WeChatUserService {
     WebResult getBindingPhone(WxDataVo wxDataVo, HttpServletRequest request);
 
     WebResult restart(String string);
+
+    WebResult saveWeChatUserInfo(WeChatUserInfoReq weChatUserInfoReq, HttpServletRequest request);
 }

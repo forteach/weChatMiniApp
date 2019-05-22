@@ -16,7 +16,9 @@ import com.forteach.wechat.mini.app.repository.WeChatUserInfoRepository;
 import com.forteach.wechat.mini.app.service.TokenService;
 import com.forteach.wechat.mini.app.service.WeChatUserService;
 import com.forteach.wechat.mini.app.util.MapUtil;
+import com.forteach.wechat.mini.app.util.UpdateUtil;
 import com.forteach.wechat.mini.app.web.req.BindingUserInfoReq;
+import com.forteach.wechat.mini.app.web.req.WeChatUserInfoReq;
 import com.forteach.wechat.mini.app.web.vo.WxDataVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -175,6 +177,25 @@ public class WeChatUserServiceImpl implements WeChatUserService {
                     weChatUserInfoRepository.delete(weChatUserInfo);
                 });
         return WebResult.okResult();
+    }
+
+    @Override
+    public WebResult saveWeChatUserInfo(WeChatUserInfoReq weChatUserInfoReq, HttpServletRequest request) {
+        String openId = tokenService.getOpenId(request);
+        Optional<WeChatUserInfo> optionalWeChatUserInfo = weChatUserInfoRepository.findByOpenId(openId).stream().filter(Objects::nonNull).findFirst();
+        if (optionalWeChatUserInfo.isPresent()){
+            WeChatUserInfo weChatUserInfo = optionalWeChatUserInfo.get();
+            UpdateUtil.copyNullProperties(weChatUserInfoReq, weChatUserInfo);
+            Optional<StudentEntitys> studentEntitysOptional = studentRepository.findById(weChatUserInfo.getStudentId());
+            if (studentEntitysOptional.isPresent()){
+                StudentEntitys studentEntitys = studentEntitysOptional.get();
+                studentEntitys.setPortrait(weChatUserInfoReq.getAvatarUrl());
+                studentRepository.save(studentEntitys);
+            }
+            weChatUserInfoRepository.save(weChatUserInfo);
+            return WebResult.okResult();
+        }
+        return WebResult.failException("用户不存在");
     }
 
     /**

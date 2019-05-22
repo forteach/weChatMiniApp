@@ -10,6 +10,7 @@ import com.forteach.wechat.mini.app.common.WebResult;
 import com.forteach.wechat.mini.app.config.WeChatMiniAppConfig;
 import com.forteach.wechat.mini.app.service.WeChatUserService;
 import com.forteach.wechat.mini.app.web.req.BindingUserInfoReq;
+import com.forteach.wechat.mini.app.web.req.WeChatUserInfoReq;
 import com.forteach.wechat.mini.app.web.vo.WxDataVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -82,12 +83,12 @@ public class WeChatUserController {
     @ApiOperation(value = "绑定微信用户登录信息")
     @PostMapping("/binding")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "userName", value = "身份证姓名", required = true, paramType = "from"),
-            @ApiImplicitParam(name = "idCardNo", value = "身份证号码", required = true, paramType = "from"),
-            @ApiImplicitParam(name = "signature", value = "sha1( rawData + session_key )", dataType = "string", paramType = "from"),
-            @ApiImplicitParam(name = "rawData", value = "rawData", dataType = "string", paramType = "from"),
-            @ApiImplicitParam(name = "encryptedData", value = "加密数据", dataType = "string", paramType = "from"),
-            @ApiImplicitParam(name = "iv", value = "数据接口返回", dataType = "string", paramType = "from"),
+            @ApiImplicitParam(name = "userName", value = "身份证姓名", required = true, paramType = "form"),
+            @ApiImplicitParam(name = "idCardNo", value = "身份证号码", required = true, paramType = "form"),
+            @ApiImplicitParam(name = "signature", value = "sha1( rawData + session_key )", dataType = "string", paramType = "form"),
+            @ApiImplicitParam(name = "rawData", value = "rawData", dataType = "string", paramType = "form"),
+            @ApiImplicitParam(name = "encryptedData", value = "加密数据", dataType = "string", paramType = "form"),
+            @ApiImplicitParam(name = "iv", value = "数据接口返回", dataType = "string", paramType = "form"),
     })
     public WebResult binding(@RequestBody BindingUserInfoReq bindingUserInfoReq, HttpServletRequest request){
         MyAssert.blank(bindingUserInfoReq.getIdCardNo(), DefineCode.ERR0010, "身份证号码不为空");
@@ -100,9 +101,22 @@ public class WeChatUserController {
      * @param studentId
      * @return
      */
-    @GetMapping("/restart")
-    public WebResult restart(@RequestBody String studentId){
-        String string = JSONObject.parseObject(studentId).getString("studentId");
-        return weChatUserService.restart(string);
+    @GetMapping("/restart/{studentId}")
+    public WebResult restart(@PathVariable("studentId") String studentId){
+        return weChatUserService.restart(studentId);
+    }
+
+    @UserLoginToken
+    @PostMapping("/saveWeUserInfo")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "nickName", value = "微信昵称", dataType = "string", required = true, paramType = "form"),
+            @ApiImplicitParam(name = "avatarUrl", value = "用户头像图片的 URL", dataType = "string", paramType = "form"),
+            @ApiImplicitParam(name = "gender", value = "性别 0：未知、1：男、2：女", dataType = "string", paramType = "form"),
+            @ApiImplicitParam(name = "province", value = "用户所在省份", dataType = "string", paramType = "form"),
+            @ApiImplicitParam(name = "city", value = "用户所在城市", dataType = "string", paramType = "form"),
+            @ApiImplicitParam(name = "country", value = "用户所在国家", dataType = "string", paramType = "form")
+    })
+    public WebResult weChatUserInfo(@RequestBody WeChatUserInfoReq weChatUserInfoReq, HttpServletRequest request){
+        return weChatUserService.saveWeChatUserInfo(weChatUserInfoReq, request);
     }
 }
