@@ -63,6 +63,11 @@ public class Dic {
     public final static String USER_PREFIX = "userToken$";
 
     /**
+     * 学生信息前缀
+     */
+    public static final String STUDENT_ADO = "studentsData$";
+
+    /**
      * 微信端学生类型
      */
     public final static String TOKEN_STUDENT ="student";

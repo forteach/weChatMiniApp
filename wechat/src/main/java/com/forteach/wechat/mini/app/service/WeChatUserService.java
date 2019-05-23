@@ -27,7 +27,7 @@ public interface WeChatUserService {
      * @param session
      * @return
      */
-    WebResult bindingToken(WxMaJscode2SessionResult session);
+    WebResult bindingToken(WxMaJscode2SessionResult session, String portrait);
 
     /**
      * 获取绑定手机号码信息

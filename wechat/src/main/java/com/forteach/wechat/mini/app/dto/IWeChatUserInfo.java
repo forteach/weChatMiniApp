@@ -9,30 +9,13 @@ package com.forteach.wechat.mini.app.dto;
  */
 public interface IWeChatUserInfo {
 
-    public String getId();
-
-    public String getOpenId();
-
-    public String getNickName();
-
-    public String getGender();
-
-    public String getLanguage();
-
-    public String getCity();
-
-    public String getProvince();
-
-    public String getCountry();
-
-    public String getAvatarUrl();
-
     public String getStudentId();
-
-    public String getBinding();
 
     public String getClassId();
 
     public String getClassName();
 
+    public String getStudentName();
+
+    public String getPortrait();
 }

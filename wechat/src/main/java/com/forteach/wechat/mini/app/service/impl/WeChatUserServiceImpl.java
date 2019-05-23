@@ -10,6 +10,7 @@ import com.forteach.wechat.mini.app.config.WeChatMiniAppConfig;
 import com.forteach.wechat.mini.app.domain.Classes;
 import com.forteach.wechat.mini.app.domain.StudentEntitys;
 import com.forteach.wechat.mini.app.domain.WeChatUserInfo;
+import com.forteach.wechat.mini.app.dto.IWeChatUserInfo;
 import com.forteach.wechat.mini.app.repository.ClassesRepository;
 import com.forteach.wechat.mini.app.repository.StudentRepository;
 import com.forteach.wechat.mini.app.repository.WeChatUserInfoRepository;
@@ -19,6 +20,7 @@ import com.forteach.wechat.mini.app.util.MapUtil;
 import com.forteach.wechat.mini.app.util.UpdateUtil;
 import com.forteach.wechat.mini.app.web.req.BindingUserInfoReq;
 import com.forteach.wechat.mini.app.web.req.WeChatUserInfoReq;
+import com.forteach.wechat.mini.app.web.resp.LoginResp;
 import com.forteach.wechat.mini.app.web.vo.WxDataVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -120,14 +122,16 @@ public class WeChatUserServiceImpl implements WeChatUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public WebResult bindingToken(WxMaJscode2SessionResult session) {
+    public WebResult bindingToken(WxMaJscode2SessionResult session, String portrait) {
         String openId = session.getOpenid();
         String token = tokenService.createToken(openId);
         String binding = WX_INFO_BINDIND_1;
+
         Optional<WeChatUserInfo> weChatUserInfoOptional = weChatUserInfoRepository.findByOpenId(openId).stream().findFirst();
         if (weChatUserInfoOptional.isPresent()) {
             binding = weChatUserInfoOptional.get().getBinding();
         }
+
         Map<String, Object> map = MapUtil.objectToMap(weChatUserInfoOptional.orElse(new WeChatUserInfo()));
         map.put("openId", openId);
         map.put("sessionKey", openId);
@@ -137,21 +141,32 @@ public class WeChatUserServiceImpl implements WeChatUserService {
         stringRedisTemplate.opsForHash().putAll(key, map);
         //设置有效期7天
         stringRedisTemplate.expire(key, TOKEN_VALIDITY_TIME, TimeUnit.SECONDS);
-        HashMap<String, String> tokenMap = cn.hutool.core.map.MapUtil.newHashMap();
-        String classId = weChatUserInfoOptional.orElse(new WeChatUserInfo()).getClassId();
-        String className = "";
-        if (StrUtil.isNotBlank(classId)){
-            Optional<Classes> optionalS = classesRepository.findById(classId);
-            if (optionalS.isPresent()){
-                className = optionalS.get().getClassName();
-            }
+
+        weChatUserInfoOptional.ifPresent(weChatUserInfo -> {
+            studentRepository.findById(weChatUserInfo.getStudentId()).ifPresent(studentEntitys -> {
+                if (StrUtil.isNotBlank(portrait)) {
+                    weChatUserInfo.setAvatarUrl(portrait);
+                    weChatUserInfoRepository.save(weChatUserInfo);
+                }
+                studentEntitys.setPortrait(portrait);
+                studentRepository.save(studentEntitys);
+                String studentKey = STUDENT_ADO.concat(weChatUserInfo.getStudentId());
+                stringRedisTemplate.opsForHash().put(studentKey, "portrait", portrait);
+            });
+        });
+
+        IWeChatUserInfo iWeChatUserInfo = weChatUserInfoRepository.findByIsValidatedEqualsAndOpenId(openId);
+        LoginResp loginResp = new LoginResp();
+        if (iWeChatUserInfo != null) {
+            loginResp.setClassId(iWeChatUserInfo.getClassId());
+            loginResp.setClassName(iWeChatUserInfo.getClassName());
+            loginResp.setPortrait(iWeChatUserInfo.getPortrait());
+            loginResp.setStudentId(iWeChatUserInfo.getStudentId());
+            loginResp.setStudentName(iWeChatUserInfo.getStudentName());
         }
-        tokenMap.put("token", token);
-        tokenMap.put("binding", binding);
-        tokenMap.put("classId", classId);
-        tokenMap.put("className", className);
-        tokenMap.put("studentId", weChatUserInfoOptional.orElse(new WeChatUserInfo()).getStudentId());
-        return WebResult.okResult(tokenMap);
+        loginResp.setBinding(binding);
+        loginResp.setToken(token);
+        return WebResult.okResult(loginResp);
     }
 
     @Override

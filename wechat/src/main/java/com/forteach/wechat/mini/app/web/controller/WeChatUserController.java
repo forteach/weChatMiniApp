@@ -12,10 +12,7 @@ import com.forteach.wechat.mini.app.service.WeChatUserService;
 import com.forteach.wechat.mini.app.web.req.BindingUserInfoReq;
 import com.forteach.wechat.mini.app.web.req.WeChatUserInfoReq;
 import com.forteach.wechat.mini.app.web.vo.WxDataVo;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,9 +45,10 @@ public class WeChatUserController {
     @ApiOperation(value = "微信小程序登录接口", notes = "微信小程序登录接口")
     @GetMapping("/login")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "code", value = "微信登录凭证(code)", dataType = "string", required = true, paramType = "query")
+            @ApiImplicitParam(name = "code", value = "微信登录凭证(code)", dataType = "string", required = true, paramType = "form"),
+            @ApiImplicitParam(name = "portrait", value = "用户头像url", dataType = "string", paramType = "form")
     })
-    public WebResult login(String code){
+    public WebResult login(@ApiParam(name = "code", value = "微信登录code") String code, @ApiParam(value = "portrait") String portrait){
         MyAssert.blank(code, DefineCode.ERR0010, "code is null");
         final WxMaService wxService = WeChatMiniAppConfig.getMaService();
         try {
@@ -58,7 +56,7 @@ public class WeChatUserController {
             this.logger.info(session.getSessionKey());
             this.logger.info(session.getOpenid());
             //TODO 可以增加自己的逻辑，关联业务相关数据
-            return weChatUserService.bindingToken(session);
+            return weChatUserService.bindingToken(session, portrait);
         } catch (WxErrorException e) {
             this.logger.error(e.getMessage(), e);
             return WebResult.failException(e.getMessage());

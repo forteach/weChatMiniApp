@@ -22,7 +22,7 @@ import javax.persistence.*;
 @DynamicUpdate
 @Table(name = "wx_userinfo", indexes = {
         @Index(columnList = "id", name = "id_index"),
-        @Index(columnList = "open_id", name = "open_id_index"),
+        @Index(columnList = "open_id", name = "open_id_index", unique = true),
         @Index(columnList = "student_id", name = "student_id_index")
 })
 @EqualsAndHashCode(callSuper = true)
