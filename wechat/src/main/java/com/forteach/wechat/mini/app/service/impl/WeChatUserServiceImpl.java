@@ -30,10 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.forteach.wechat.mini.app.common.Dic.*;
@@ -185,36 +182,43 @@ public class WeChatUserServiceImpl implements WeChatUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public WebResult restart(String string) {
-        weChatUserInfoRepository.findByStudentId(string)
-                .stream()
-                .filter(Objects::nonNull)
-                .forEach(weChatUserInfo -> {
-                    weChatUserInfoRepository.delete(weChatUserInfo);
-                });
-        return WebResult.okResult();
+        List<WeChatUserInfo> list = weChatUserInfoRepository.findByStudentId(string);
+        if (list.size() > 0) {
+            list
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .forEach(weChatUserInfo -> {
+                        weChatUserInfoRepository.delete(weChatUserInfo);
+                    });
+            return WebResult.okResult();
+        } else {
+            return WebResult.okResult("不存要删除的用户");
+        }
     }
 
     @Override
     public WebResult saveWeChatUserInfo(WeChatUserInfoReq weChatUserInfoReq, HttpServletRequest request) {
         String openId = tokenService.getOpenId(request);
         Optional<WeChatUserInfo> optionalWeChatUserInfo = weChatUserInfoRepository.findByOpenId(openId).stream().filter(Objects::nonNull).findFirst();
-        if (optionalWeChatUserInfo.isPresent()){
+        if (optionalWeChatUserInfo.isPresent()) {
             WeChatUserInfo weChatUserInfo = optionalWeChatUserInfo.get();
             UpdateUtil.copyNullProperties(weChatUserInfoReq, weChatUserInfo);
             Optional<StudentEntitys> studentEntitysOptional = studentRepository.findById(weChatUserInfo.getStudentId());
-            if (studentEntitysOptional.isPresent()){
+            if (studentEntitysOptional.isPresent()) {
                 StudentEntitys studentEntitys = studentEntitysOptional.get();
                 studentEntitys.setPortrait(weChatUserInfoReq.getAvatarUrl());
                 studentRepository.save(studentEntitys);
             }
             weChatUserInfoRepository.save(weChatUserInfo);
             return WebResult.okResult();
+        }else {
+            return WebResult.failException("用户不存在");
         }
-        return WebResult.failException("用户不存在");
     }
 
     /**
      * 校验身份证和姓名在数据库中是否存在
+     *
      * @param bindingUserInfoReq
      * @param studentEntitys
      * @return
@@ -226,6 +230,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
 
     /**
      * 校验是否是微信发送的数据
+     *
      * @param sessionKey
      * @param wxService
      * @param bindingUserInfoReq
