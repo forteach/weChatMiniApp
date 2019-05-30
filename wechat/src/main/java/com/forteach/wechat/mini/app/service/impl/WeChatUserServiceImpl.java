@@ -184,9 +184,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
     public WebResult restart(String string) {
         List<WeChatUserInfo> list = weChatUserInfoRepository.findByStudentId(string);
         if (list.size() > 0) {
-            list
-                    .stream()
-                    .filter(Objects::nonNull)
+            list.stream().filter(Objects::nonNull)
                     .forEach(weChatUserInfo -> {
                         weChatUserInfoRepository.delete(weChatUserInfo);
                     });
