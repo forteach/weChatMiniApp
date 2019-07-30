@@ -7,11 +7,9 @@ import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import cn.hutool.core.util.StrUtil;
 import com.forteach.wechat.mini.app.common.WebResult;
 import com.forteach.wechat.mini.app.config.WeChatMiniAppConfig;
-import com.forteach.wechat.mini.app.domain.Classes;
 import com.forteach.wechat.mini.app.domain.StudentEntitys;
 import com.forteach.wechat.mini.app.domain.WeChatUserInfo;
 import com.forteach.wechat.mini.app.dto.IWeChatUserInfo;
-import com.forteach.wechat.mini.app.repository.ClassesRepository;
 import com.forteach.wechat.mini.app.repository.StudentRepository;
 import com.forteach.wechat.mini.app.repository.WeChatUserInfoRepository;
 import com.forteach.wechat.mini.app.service.TokenService;
@@ -30,7 +28,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static com.forteach.wechat.mini.app.common.Dic.*;
@@ -54,19 +55,16 @@ public class WeChatUserServiceImpl implements WeChatUserService {
 
     private final TokenService tokenService;
 
-    private final ClassesRepository classesRepository;
 
     @Autowired
     public WeChatUserServiceImpl(StudentRepository studentRepository,
                                  WeChatUserInfoRepository weChatUserInfoRepository,
                                  StringRedisTemplate stringRedisTemplate,
-                                 ClassesRepository classesRepository,
                                  TokenService tokenService) {
         this.studentRepository = studentRepository;
         this.weChatUserInfoRepository = weChatUserInfoRepository;
         this.stringRedisTemplate = stringRedisTemplate;
         this.tokenService = tokenService;
-        this.classesRepository = classesRepository;
     }
 
     @Override
@@ -195,6 +193,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public WebResult saveWeChatUserInfo(WeChatUserInfoReq weChatUserInfoReq, HttpServletRequest request) {
         String openId = tokenService.getOpenId(request);
         Optional<WeChatUserInfo> optionalWeChatUserInfo = weChatUserInfoRepository.findByOpenId(openId).stream().filter(Objects::nonNull).findFirst();
@@ -209,7 +208,7 @@ public class WeChatUserServiceImpl implements WeChatUserService {
             }
             weChatUserInfoRepository.save(weChatUserInfo);
             return WebResult.okResult();
-        }else {
+        } else {
             return WebResult.failException("用户不存在");
         }
     }
