@@ -90,6 +90,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
+            <version>2.6.2</version>
         </dependency>
         <!-- swagger2 展示接口文档 　-->
         <dependency>
